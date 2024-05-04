@@ -16,6 +16,8 @@ using OWSShared.Interfaces;
 using OWSPublicAPI.Requests.Characters;
 using OWSData.Repositories.Interfaces;
 using OWSPublicAPI.DTOs;
+using OWSData.Models.Composites;
+using OWSCharacterPersistence.Requests.Characters;
 
 namespace OWSPublicAPI.Controllers
 {
@@ -29,7 +31,6 @@ namespace OWSPublicAPI.Controllers
     [ApiController]
     public class CharactersController : Controller
     {
-        private readonly Container _container;
         private readonly IUsersRepository _usersRepository;
         private readonly ICharactersRepository _charactersRepository;
         private readonly IHeaderCustomerGUID _customerGuid;
@@ -42,10 +43,9 @@ namespace OWSPublicAPI.Controllers
         /// <remarks>
         /// All dependencies are injected.
         /// </remarks>
-        public CharactersController(Container container, IUsersRepository usersRepository, ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid, 
+        public CharactersController(IUsersRepository usersRepository, ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid, 
             ICustomCharacterDataSelector customCharacterDataSelector, IGetReadOnlyPublicCharacterData getReadOnlyPublicCharacterData)
         {
-            _container = container;
             _usersRepository = usersRepository;
             _charactersRepository = charactersRepository;
             _customerGuid = customerGuid;
@@ -83,6 +83,62 @@ namespace OWSPublicAPI.Controllers
         {
             GetByNameRequest getByNameRequest = new GetByNameRequest(request, _usersRepository, _charactersRepository, _customerGuid, _customCharacterDataSelector, _getReadOnlyPublicCharacterData);
             return await getByNameRequest.Handle();
+        }
+
+        [HttpPost]
+        [Route("AddOrUpdateCustomData")]
+        public async Task AddOrUpdateCustomData([FromBody] AddOrUpdateCustomDataRequest request)
+        {
+            request.SetData(_charactersRepository, _customerGuid);
+            await request.Handle();
+
+            return;
+        }
+
+        //completely duplicate naming... need to untangle
+        //[HttpPost]
+        //[Route("GetByName")]
+        //[Produces(typeof(GetCharByCharName))]
+        //public async Task<IActionResult> GetByName([FromBody] GetByNameRequest request)
+        //{
+        //    //request.SetData(_charactersRepository, _customerGuid);
+        //    return await request.Handle();
+        //}
+
+        [HttpPost]
+        [Route("GetCustomData")]
+        [Produces(typeof(CustomCharacterDataRows))]
+        public async Task<CustomCharacterDataRows> GetCustomData([FromBody] GetCustomDataRequest request)
+        {
+            request.SetData(_charactersRepository, _customerGuid);
+            return await request.Handle();
+        }
+
+        [HttpPost]
+        [Route("UpdateAllPlayerPositions")]
+        [Produces(typeof(SuccessAndErrorMessage))]
+        public async Task<SuccessAndErrorMessage> UpdateAllPlayerPositions([FromBody] UpdateAllPlayerPositionsRequest request)
+        {
+            request.SetData(_charactersRepository, _customerGuid);
+            return await request.Handle();
+        }
+
+        [HttpPost]
+        [Route("UpdateCharacterStats")]
+        [Produces(typeof(SuccessAndErrorMessage))]
+        public async Task<SuccessAndErrorMessage> UpdateCharacterStats([FromBody] UpdateCharacterStatsRequest request)
+        {
+            request.SetData(_charactersRepository, _customerGuid);
+            return await request.Handle();
+        }
+
+        [HttpPost]
+        [Route("PlayerLogout")]
+        [Produces(typeof(SuccessAndErrorMessage))]
+        public async Task<SuccessAndErrorMessage> PlayerLogout([FromBody] PlayerLogoutRequest request)
+        {
+            request.SetData(_charactersRepository, _customerGuid);
+            return await request.Handle();
         }
 
     }

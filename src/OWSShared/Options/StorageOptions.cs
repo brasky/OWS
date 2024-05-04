@@ -6,4 +6,10 @@
         public string OWSDBBackend { get; set; }
         public string OWSDBConnectionString { get; set; }
     }
+
+    public sealed class OWSStorageConfig
+    {
+        public string OWSDBBackend { get; set; }
+        public string OWSDBConnectionString { get; set; }
+    }
 }

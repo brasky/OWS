@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orleans.Hosting;
+using OWSShared.Middleware;
 using Serilog;
 
 namespace OWSPublicAPI
@@ -36,11 +38,12 @@ namespace OWSPublicAPI
 
             try
             {
-                CreateHostBuilder(args).Build().Run();
-            }
-            catch
-            {
-                throw;
+                CreateHostBuilder(args)
+                    .UseOrleansClient(client =>
+                    {
+                        client.UseLocalhostClustering();
+                    })
+                    .Build().Run();
             }
             finally
             {

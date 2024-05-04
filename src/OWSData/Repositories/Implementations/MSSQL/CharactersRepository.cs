@@ -20,9 +20,9 @@ namespace OWSData.Repositories.Implementations.MSSQL
 {
     public class CharactersRepository : ICharactersRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public CharactersRepository(IOptions<StorageOptions> storageOptions)
+        public CharactersRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             _storageOptions = storageOptions;
         }

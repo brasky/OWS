@@ -23,7 +23,6 @@ namespace OWSPublicAPI.Requests.Users
         private readonly RegisterUserDTO _registerUserDTO;
         private readonly Guid _customerGUID;
         private readonly IUsersRepository _usersRepository;
-        private readonly IExternalLoginProviderFactory _externalLoginProviderFactory;
 
         /// <summary>
         /// RegisterUserRequest Constructor
@@ -31,12 +30,11 @@ namespace OWSPublicAPI.Requests.Users
         /// <remarks>
         /// Initialize the RegisterUserRequest object with dependencies
         /// </remarks>
-        public RegisterUserRequest(RegisterUserDTO registerUserDTO, IUsersRepository usersRepository, IExternalLoginProviderFactory externalLoginProviderFactory, IHeaderCustomerGUID customerGuid)
+        public RegisterUserRequest(RegisterUserDTO registerUserDTO, IUsersRepository usersRepository, IHeaderCustomerGUID customerGuid)
         {
             _registerUserDTO = registerUserDTO;
             _customerGUID = customerGuid.CustomerGUID;
             _usersRepository = usersRepository;
-            _externalLoginProviderFactory = externalLoginProviderFactory;
         }
 
         /// <summary>

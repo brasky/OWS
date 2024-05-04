@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OWSData.Models.Tables;
+using Orleans;
 
 namespace OWSData.Models.StoredProcs
 {
@@ -13,28 +14,30 @@ namespace OWSData.Models.StoredProcs
         public Characters character { get; set; }
 
     }
+
+    [GenerateSerializer, Serializable]
     public class GetUserSession
     {
-        public Guid CustomerGuid { get; set; }
-        public Guid? UserGuid { get; set; }
-        public Guid UserSessionGUID { get; set; }
-        public DateTime LoginDate { get; set; }
-        public string SelectedCharacterName { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
-        public DateTime CreateDate { get; set; }
-        public DateTime LastAccess { get; set; }
-        public string Role { get; set; }
+        [Id(0)] public Guid CustomerGuid { get; set; }
+        [Id(1)] public Guid? UserGuid { get; set; }
+        [Id(2)] public Guid UserSessionGUID { get; set; }
+        [Id(3)] public DateTime LoginDate { get; set; }
+        [Id(4)] public string SelectedCharacterName { get; set; }
+        [Id(5)] public string FirstName { get; set; }
+        [Id(6)] public string LastName { get; set; }
+        [Id(7)] public string Email { get; set; }
+        [Id(8)] public DateTime CreateDate { get; set; }
+        [Id(9)] public DateTime LastAccess { get; set; }
+        [Id(10)] public string Role { get; set; }
 
-        public int CharacterID { get; set; }
-        public string CharName { get; set; }
-        public string ZoneName { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
-        public double Rx { get; set; }
-        public double Ry { get; set; }
-        public double Rz { get; set; }        
+        [Id(11)] public int CharacterID { get; set; }
+        [Id(12)] public string CharName { get; set; }
+        [Id(13)] public string ZoneName { get; set; }
+        [Id(14)] public double X { get; set; }
+        [Id(15)] public double Y { get; set; }
+        [Id(16)] public double Z { get; set; }
+        [Id(17)] public double Rx { get; set; }
+        [Id(18)] public double Ry { get; set; }
+        [Id(19)] public double Rz { get; set; }        
     }
 }

@@ -13,7 +13,7 @@ namespace OWSPublicAPI.Requests.Users
     public class GetUserRequest : IRequestHandler<GetUserRequest, IActionResult>, IRequest
     {
 
-        private User output;
+        private OWSData.Models.Tables.User output;
         private Guid customerGuid;
         private Guid userGuid;
         private IUsersRepository usersRepository;

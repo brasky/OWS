@@ -20,6 +20,8 @@ using System.Net.Http;
 using OWSData.Models.Tables;
 using Microsoft.Extensions.Logging;
 using OWSPublicAPI.DTOs;
+using Orleans;
+using User.Interfaces;
 
 namespace OWSPublicAPI.Controllers
 {
@@ -34,15 +36,14 @@ namespace OWSPublicAPI.Controllers
     public class UsersController : Controller
     {
         private readonly ILogger _logger;
-        private readonly Container _container;
         private readonly IUsersRepository _usersRepository;
-        private readonly IExternalLoginProviderFactory _externalLoginProviderFactory;
         private readonly ICharactersRepository _charactersRepository;
         private readonly IPublicAPIInputValidation _publicAPIInputValidation;
         private readonly IHeaderCustomerGUID _customerGuid;
         private readonly IOptions<PublicAPIOptions> _owsGeneralConfig;
         private readonly IOptions<APIPathOptions> _owsApiPathConfig;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IClusterClient _clusterClient;
 
         /// <summary>
         /// Constructor for Public User related API calls.
@@ -52,26 +53,24 @@ namespace OWSPublicAPI.Controllers
         /// </remarks>
         public UsersController(
             ILogger<UsersController> logger,
-            Container container, 
             IUsersRepository usersRepository,
-            IExternalLoginProviderFactory externalLoginProviderFactory,
             ICharactersRepository charactersRepository,
             IPublicAPIInputValidation publicAPIInputValidation,
             IHeaderCustomerGUID customerGuid,
             IOptions<PublicAPIOptions> owsGeneralConfig,
             IOptions<APIPathOptions> owsApiPathConfig,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IClusterClient clusterClient)
         {
             _logger = logger;
-            _container = container;
             _usersRepository = usersRepository;
-            _externalLoginProviderFactory = externalLoginProviderFactory;
             _charactersRepository = charactersRepository;
             _publicAPIInputValidation = publicAPIInputValidation;
             _customerGuid = customerGuid;
             _owsGeneralConfig = owsGeneralConfig;
             _owsApiPathConfig = owsApiPathConfig;
             _httpClientFactory = httpClientFactory;
+            _clusterClient = clusterClient;
         }
 
         /// <summary>
@@ -155,8 +154,15 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetServerToConnectTo))]
         public async Task<IActionResult> GetServerToConnectTo([FromBody] GetServerToConnectToRequest request)
         {
-            request.SetData(_owsGeneralConfig, _usersRepository, _charactersRepository, _customerGuid, _httpClientFactory);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            var joinMapObject = await grain.GetServerToConnectTo(
+                customerGuid: _customerGuid.CustomerGUID,
+                zoneName: request.ZoneName,
+                playerGroupType: request.PlayerGroupType);
+
+            return new OkObjectResult(joinMapObject);
+            //request.SetData(_owsGeneralConfig, _usersRepository, _charactersRepository, _customerGuid, _httpClientFactory);
+            //return await request.Handle();
         }
 
         /// <summary>
@@ -170,8 +176,9 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetUserSession))]
         public async Task<IActionResult> GetUserSession([FromQuery] GetUserSessionRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            var usersession = await grain.GetUserSessionAsync(_customerGuid.CustomerGUID);
+            return new OkObjectResult(usersession);
         }
 
         /// <summary>
@@ -197,8 +204,9 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(PlayerLoginAndCreateSession))]
         public async Task<IActionResult> ExternalLoginAndCreateSession([FromBody] ExternalLoginAndCreateSessionRequest request)
         {
-            request.SetData(_usersRepository, _externalLoginProviderFactory, _customerGuid);
-            return await request.Handle();
+            throw new NotImplementedException();
+            //request.SetData(_usersRepository, _externalLoginProviderFactory, _customerGuid);
+            //return await request.Handle();
         }
 
         /// <summary>
@@ -254,7 +262,7 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(PlayerLoginAndCreateSession))]
         public async Task<PlayerLoginAndCreateSession> RegisterUser([FromBody] RegisterUserDTO requestDTO)
         {
-            RegisterUserRequest request = new RegisterUserRequest(requestDTO, _usersRepository, _externalLoginProviderFactory, _customerGuid);
+            RegisterUserRequest request = new RegisterUserRequest(requestDTO, _usersRepository, _customerGuid);
             return await request.Handle();
         }
 

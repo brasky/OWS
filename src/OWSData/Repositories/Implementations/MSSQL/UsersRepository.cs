@@ -19,9 +19,9 @@ namespace OWSData.Repositories.Implementations.MSSQL
 {
     public class UsersRepository : IUsersRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public UsersRepository(IOptions<StorageOptions> storageOptions)
+        public UsersRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             _storageOptions = storageOptions;
         }

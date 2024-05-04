@@ -103,19 +103,6 @@ namespace OWSInstanceLauncher
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-
-            services.AddHttpContextAccessor();
-
-            services.AddMvcCore(config =>
-            {
-                //IHttpRequestStreamReaderFactory readerFactory = services.BuildServiceProvider().GetRequiredService<IHttpRequestStreamReaderFactory>();
-                //config.ModelBinderProviders.Insert(0, new Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider(config.InputFormatters, readerFactory));
-                //config.ModelBinderProviders.Insert(0, new QueryModelBinderProvider(container));
-            })
-            .AddViews()
-            .AddApiExplorer();
-
             services.ConfigureWritable<OWSShared.Options.OWSInstanceLauncherOptions>(Configuration.GetSection(OWSShared.Options.OWSInstanceLauncherOptions.SectionName));
             services.Configure<OWSShared.Options.APIPathOptions>(Configuration.GetSection(OWSShared.Options.APIPathOptions.SectionName));
             services.Configure<OWSShared.Options.RabbitMQOptions>(Configuration.GetSection(OWSShared.Options.RabbitMQOptions.SectionName));
@@ -144,29 +131,6 @@ namespace OWSInstanceLauncher
         {
             app.UseSimpleInjector(container);
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseExceptionHandler("/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-            });
-
             container.Verify();
         }
 
@@ -182,7 +146,7 @@ namespace OWSInstanceLauncher
 
             //ServerLauncherMQListener runs only once
             container.RegisterInstance(new TimedHostedService<IInstanceLauncherJob>.Settings(
-                interval: TimeSpan.FromSeconds(10),
+                interval: TimeSpan.FromSeconds(1),
                 runOnce: true,
                 action: processor => processor.DoWork(),
                 dispose: processor => processor.Dispose()

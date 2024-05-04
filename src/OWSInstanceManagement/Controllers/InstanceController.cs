@@ -143,19 +143,6 @@ namespace OWSInstanceManagement.Controllers
             return await request.Handle();
         }
 
-        [HttpPost]
-        [Route("GetServerToConnectTo")]
-        [Produces(typeof(JoinMapByCharName))]
-        /*[SwaggerOperation("ByName")]
-        [SwaggerResponse(200)]
-        [SwaggerResponse(404)]*/
-        public async Task<IActionResult> GetServerToConnectToRequest([FromBody] GetServerToConnectToRequest request)
-        {
-            request.SetData(_charactersRepository, _customerGuid);
-
-            return await request.Handle();
-        }
-
         /// <summary>
         /// GetZoneInstance
         /// </summary>

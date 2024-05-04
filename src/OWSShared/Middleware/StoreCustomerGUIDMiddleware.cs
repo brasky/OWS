@@ -3,40 +3,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using OWSShared.Interfaces;
 
 namespace OWSShared.Middleware
 {
-    public class StoreCustomerGUIDMiddleware : IMiddleware
+    public class StoreCustomerGUIDMiddleware
     {
-        private readonly IHeaderCustomerGUID _customerGuid;
+        private IHeaderCustomerGUID _customerGuid;
+        private readonly RequestDelegate _next;
 
-        public StoreCustomerGUIDMiddleware(IHeaderCustomerGUID customerGuid)
+        public StoreCustomerGUIDMiddleware(RequestDelegate next)
         {
-            _customerGuid = customerGuid;
+            _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, RequestDelegate next)
+        public async Task InvokeAsync(HttpContext context, IHeaderCustomerGUID customerGuidService)
         {
-            try
+            _customerGuid = customerGuidService;
+            if (context.Request.Headers.TryGetValue("X-CustomerGUID", out var value)
+                && Guid.TryParse(value, out var customerGuid))
             {
-                _customerGuid.CustomerGUID = Guid.Parse(context.Request.Headers.FirstOrDefault(x =>
-                    string.Equals(x.Key, "X-CustomerGUID", StringComparison.CurrentCultureIgnoreCase)).Value.ToString());
-
-                if (_customerGuid.CustomerGUID == Guid.Empty)
-                {
-                    context.Response.Clear();
-                    context.Response.StatusCode = 401;
-                    await context.Response.WriteAsync("Unauthorized");
-                    return;
-                }
-            }
-            catch (Exception)
-            {
+                _customerGuid.CustomerGUID = customerGuid;
             }
 
-            await next(context);
+            if (_customerGuid.CustomerGUID == Guid.Empty)
+            {
+                context.Response.Clear();
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Unauthorized");
+                return;
+            }
+
+            await _next(context);
+        }
+    }
+
+    public static class StoreCustomerGUIDMiddlewareExtensions
+    {
+        public static IApplicationBuilder UseStoreCustomerGuidMiddleware(
+            this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<StoreCustomerGUIDMiddleware>();
         }
     }
 }
