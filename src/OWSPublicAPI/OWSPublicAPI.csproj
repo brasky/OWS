@@ -34,8 +34,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\OWS.CharacterGrains\OWS.Grains.csproj" />
-    <ProjectReference Include="..\..\User.Interfaces\OWS.Interfaces.csproj" />
+    <ProjectReference Include="..\OWS.Interfaces\OWS.Interfaces.csproj" />
     <ProjectReference Include="..\OWSData\OWSData.csproj" />
     <ProjectReference Include="..\OWSExternalLoginProviders\OWSExternalLoginProviders.csproj" />
     <ProjectReference Include="..\OWSShared\OWSShared.csproj" />

@@ -81,7 +81,7 @@ namespace OWSPublicAPI.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> GetByName([FromBody] GetByNameDTO request)
         {
-            GetByNameRequest getByNameRequest = new GetByNameRequest(request, _usersRepository, _charactersRepository, _customerGuid, _customCharacterDataSelector, _getReadOnlyPublicCharacterData);
+            PublicGetByNameRequest getByNameRequest = new PublicGetByNameRequest(request, _usersRepository, _charactersRepository, _customerGuid, _customCharacterDataSelector, _getReadOnlyPublicCharacterData);
             return await getByNameRequest.Handle();
         }
 
@@ -95,15 +95,14 @@ namespace OWSPublicAPI.Controllers
             return;
         }
 
-        //completely duplicate naming... need to untangle
-        //[HttpPost]
-        //[Route("GetByName")]
-        //[Produces(typeof(GetCharByCharName))]
-        //public async Task<IActionResult> GetByName([FromBody] GetByNameRequest request)
-        //{
-        //    //request.SetData(_charactersRepository, _customerGuid);
-        //    return await request.Handle();
-        //}
+        [HttpPost]
+        [Route("GetByName")]
+        [Produces(typeof(GetCharByCharName))]
+        public async Task<IActionResult> GetByName([FromBody] GetByNameRequest request)
+        {
+            //request.SetData(_charactersRepository, _customerGuid);
+            return await request.Handle();
+        }
 
         [HttpPost]
         [Route("GetCustomData")]

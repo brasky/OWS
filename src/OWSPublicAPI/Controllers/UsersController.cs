@@ -21,7 +21,7 @@ using OWSData.Models.Tables;
 using Microsoft.Extensions.Logging;
 using OWSPublicAPI.DTOs;
 using Orleans;
-using User.Interfaces;
+using OWS.Interfaces;
 
 namespace OWSPublicAPI.Controllers
 {

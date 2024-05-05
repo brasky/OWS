@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\User.Interfaces\OWS.Interfaces.csproj" />
+    <ProjectReference Include="..\OWS.Interfaces\OWS.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

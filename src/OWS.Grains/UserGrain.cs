@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OWSData.Models.StoredProcs;
 using OWSData.Repositories.Interfaces;
-using User.Interfaces;
+using OWS.Interfaces;
 
 namespace OWS.Grains
 {

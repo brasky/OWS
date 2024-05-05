@@ -1,6 +1,6 @@
 ﻿using OWSData.Models.StoredProcs;
 
-namespace User.Interfaces
+namespace OWS.Interfaces
 {
     public interface IUserGrain : IGrainWithGuidKey
     {

@@ -35,8 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OWS.CharacterGrains\OWS.Grains.csproj" />
-    <ProjectReference Include="..\User.Interfaces\OWS.Interfaces.csproj" />
+    <ProjectReference Include="..\OWS.Grains\OWS.Grains.csproj" />
+    <ProjectReference Include="..\OWS.Interfaces\OWS.Interfaces.csproj" />
   </ItemGroup>
 
 </Project>

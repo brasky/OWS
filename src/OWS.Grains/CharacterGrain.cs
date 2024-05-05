@@ -7,7 +7,7 @@ using OWSShared.Interfaces;
 using OWSShared.Messages;
 using OWSShared.Options;
 using RabbitMQ.Client;
-using User.Interfaces;
+using OWS.Interfaces;
 
 namespace OWS.Grains
 {

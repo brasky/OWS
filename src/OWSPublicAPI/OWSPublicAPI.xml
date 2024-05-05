@@ -294,7 +294,7 @@
             Configure the web host.
             </remarks>
         </member>
-        <member name="T:OWSPublicAPI.Requests.Characters.GetByNameRequest">
+        <member name="T:OWSPublicAPI.Requests.Characters.PublicGetByNameRequest">
             <summary>
             GetByNameRequest Handler
             </summary>
@@ -302,7 +302,7 @@
             Handles api/Characters/GetByName requests.
             </remarks>
         </member>
-        <member name="M:OWSPublicAPI.Requests.Characters.GetByNameRequest.#ctor(OWSPublicAPI.DTOs.GetByNameDTO,OWSData.Repositories.Interfaces.IUsersRepository,OWSData.Repositories.Interfaces.ICharactersRepository,OWSShared.Interfaces.IHeaderCustomerGUID,OWSShared.Interfaces.ICustomCharacterDataSelector,OWSShared.Interfaces.IGetReadOnlyPublicCharacterData)">
+        <member name="M:OWSPublicAPI.Requests.Characters.PublicGetByNameRequest.#ctor(OWSPublicAPI.DTOs.GetByNameDTO,OWSData.Repositories.Interfaces.IUsersRepository,OWSData.Repositories.Interfaces.ICharactersRepository,OWSShared.Interfaces.IHeaderCustomerGUID,OWSShared.Interfaces.ICustomCharacterDataSelector,OWSShared.Interfaces.IGetReadOnlyPublicCharacterData)">
             <summary>
             Constructor for GetByNameRequest
             </summary>
@@ -310,7 +310,7 @@
             Injects the dependencies for the GetByNameRequest.
             </remarks>
         </member>
-        <member name="M:OWSPublicAPI.Requests.Characters.GetByNameRequest.Handle">
+        <member name="M:OWSPublicAPI.Requests.Characters.PublicGetByNameRequest.Handle">
             <summary>
             Handles the GetByNameRequest
             </summary>
