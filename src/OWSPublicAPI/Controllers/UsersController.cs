@@ -86,9 +86,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(CreateCharacter))]
         public async Task<IActionResult> CreateCharacter([FromBody] CreateCharacterRequest request)
         {
-            
-            request.SetData(_usersRepository, _publicAPIInputValidation, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            return new OkObjectResult(await grain.Create(request.UserSessionGUID, request.ClassName));
         }
 
         /// <summary>
@@ -156,7 +155,6 @@ namespace OWSPublicAPI.Controllers
         {
             var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
             var joinMapObject = await grain.GetServerToConnectTo(
-                customerGuid: _customerGuid.CustomerGUID,
                 zoneName: request.ZoneName,
                 playerGroupType: request.PlayerGroupType);
 
@@ -177,7 +175,7 @@ namespace OWSPublicAPI.Controllers
         public async Task<IActionResult> GetUserSession([FromQuery] GetUserSessionRequest request)
         {
             var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
-            var usersession = await grain.GetUserSessionAsync(_customerGuid.CustomerGUID);
+            var usersession = await grain.GetUserSessionAsync();
             return new OkObjectResult(usersession);
         }
 

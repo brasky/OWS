@@ -1,23 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Azure.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Dapper;
-using System.Data;
-using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using SimpleInjector;
-using OWSData.Models.StoredProcs;
-using OWSShared.Interfaces;
-using OWSPublicAPI.Requests.Characters;
-using OWSData.Repositories.Interfaces;
-using OWSPublicAPI.DTOs;
-using OWSData.Models.Composites;
+using Orleans;
+using OWS.Interfaces;
 using OWSCharacterPersistence.Requests.Characters;
+using OWSData.Models.Composites;
+using OWSData.Models.StoredProcs;
+using OWSPublicAPI.DTOs;
+using OWSPublicAPI.Requests.Characters;
+using System;
+using System.Threading.Tasks;
 
 namespace OWSPublicAPI.Controllers
 {
@@ -31,11 +23,7 @@ namespace OWSPublicAPI.Controllers
     [ApiController]
     public class CharactersController : Controller
     {
-        private readonly IUsersRepository _usersRepository;
-        private readonly ICharactersRepository _charactersRepository;
-        private readonly IHeaderCustomerGUID _customerGuid;
-        private readonly ICustomCharacterDataSelector _customCharacterDataSelector;
-        private readonly IGetReadOnlyPublicCharacterData _getReadOnlyPublicCharacterData;
+        private readonly IClusterClient _clusterClient;
 
         /// <summary>
         /// Constructor for Public Character related API calls.
@@ -43,14 +31,9 @@ namespace OWSPublicAPI.Controllers
         /// <remarks>
         /// All dependencies are injected.
         /// </remarks>
-        public CharactersController(IUsersRepository usersRepository, ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid, 
-            ICustomCharacterDataSelector customCharacterDataSelector, IGetReadOnlyPublicCharacterData getReadOnlyPublicCharacterData)
+        public CharactersController(IClusterClient clusterClient)
         {
-            _usersRepository = usersRepository;
-            _charactersRepository = charactersRepository;
-            _customerGuid = customerGuid;
-            _customCharacterDataSelector = customCharacterDataSelector;
-            _getReadOnlyPublicCharacterData = getReadOnlyPublicCharacterData;
+            _clusterClient = clusterClient;
         }
 
         /// <summary>
@@ -61,10 +44,6 @@ namespace OWSPublicAPI.Controllers
         /// </remarks>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (_customerGuid.CustomerGUID == Guid.Empty)
-            {
-                context.Result = new UnauthorizedResult();
-            }
         }
 
         /// <summary>
@@ -79,20 +58,22 @@ namespace OWSPublicAPI.Controllers
         /*[SwaggerOperation("ByName")]
         [SwaggerResponse(200)]
         [SwaggerResponse(404)]*/
-        public async Task<IActionResult> GetByName([FromBody] GetByNameDTO request)
+        public async Task<IActionResult> PublicGetByNameRequest([FromBody] GetByNameDTO request)
         {
-            PublicGetByNameRequest getByNameRequest = new PublicGetByNameRequest(request, _usersRepository, _charactersRepository, _customerGuid, _customCharacterDataSelector, _getReadOnlyPublicCharacterData);
-            return await getByNameRequest.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            if (!Guid.TryParse(request.UserSessionGUID, out var userSessionId))
+            {
+                return BadRequest("Invalid User Session Id");
+            }
+            return new OkObjectResult(await grain.PublicGetByNameRequest(userSessionId));
         }
 
         [HttpPost]
         [Route("AddOrUpdateCustomData")]
         public async Task AddOrUpdateCustomData([FromBody] AddOrUpdateCustomDataRequest request)
         {
-            request.SetData(_charactersRepository, _customerGuid);
-            await request.Handle();
-
-            return;
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.addOrUpdateCustomCharacterData.CharacterName);
+            await grain.AddOrUpdateCustomData(request.addOrUpdateCustomCharacterData);
         }
 
         [HttpPost]
@@ -100,8 +81,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetCharByCharName))]
         public async Task<IActionResult> GetByName([FromBody] GetByNameRequest request)
         {
-            //request.SetData(_charactersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            return new OkObjectResult(await grain.GetByName());
         }
 
         [HttpPost]
@@ -109,8 +90,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(CustomCharacterDataRows))]
         public async Task<CustomCharacterDataRows> GetCustomData([FromBody] GetCustomDataRequest request)
         {
-            request.SetData(_charactersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            return await grain.GetCustomData();
         }
 
         [HttpPost]
@@ -118,7 +99,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<SuccessAndErrorMessage> UpdateAllPlayerPositions([FromBody] UpdateAllPlayerPositionsRequest request)
         {
-            request.SetData(_charactersRepository, _customerGuid);
+            //TODO: merits a zonegrain
+            //request.SetData(_charactersRepository, _customerGuid);
             return await request.Handle();
         }
 
@@ -127,8 +109,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<SuccessAndErrorMessage> UpdateCharacterStats([FromBody] UpdateCharacterStatsRequest request)
         {
-            request.SetData(_charactersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.updateCharacterStats.CharName);
+            return await grain.UpdateCharacterStats(request.updateCharacterStats);
         }
 
         [HttpPost]
@@ -136,9 +118,15 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<SuccessAndErrorMessage> PlayerLogout([FromBody] PlayerLogoutRequest request)
         {
-            request.SetData(_charactersRepository, _customerGuid);
-            return await request.Handle();
-        }
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            await grain.Logout();
 
+            //Just doing this to keep the client API the same
+            //why would we return an error logging out?
+            SuccessAndErrorMessage output = new SuccessAndErrorMessage();
+            output.Success = true;
+            output.ErrorMessage = "";
+            return output;
+        }
     }
 }

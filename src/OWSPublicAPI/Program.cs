@@ -8,7 +8,10 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Orleans;
 using Orleans.Hosting;
+using Orleans.Runtime;
+using OWSShared.Interfaces;
 using OWSShared.Middleware;
 using Serilog;
 
@@ -42,6 +45,7 @@ namespace OWSPublicAPI
                     .UseOrleansClient(client =>
                     {
                         client.UseLocalhostClustering();
+                        client.AddOutgoingGrainCallFilter<CustomerIdClientFilter>();
                     })
                     .Build().Run();
             }
@@ -72,5 +76,23 @@ namespace OWSPublicAPI
                     builder.AddSerilog();
                 })
                 .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+    }
+
+    public class CustomerIdClientFilter : IOutgoingGrainCallFilter
+    {
+        public CustomerIdClientFilter(IHeaderCustomerGUID customerGuid)
+        {
+            _customerGuid = customerGuid;
+        }
+
+        IHeaderCustomerGUID _customerGuid;
+
+        public async Task Invoke(IOutgoingGrainCallContext context)
+        {
+
+            RequestContext.Set("CustomerId", _customerGuid.CustomerGUID);
+            await context.Invoke();
+
+        }
     }
 }

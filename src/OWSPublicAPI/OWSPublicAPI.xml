@@ -12,7 +12,7 @@
             Contains character related API calls that are all publicly accessible.
             </remarks>
         </member>
-        <member name="M:OWSPublicAPI.Controllers.CharactersController.#ctor(OWSData.Repositories.Interfaces.IUsersRepository,OWSData.Repositories.Interfaces.ICharactersRepository,OWSShared.Interfaces.IHeaderCustomerGUID,OWSShared.Interfaces.ICustomCharacterDataSelector,OWSShared.Interfaces.IGetReadOnlyPublicCharacterData)">
+        <member name="M:OWSPublicAPI.Controllers.CharactersController.#ctor(Orleans.IClusterClient)">
             <summary>
             Constructor for Public Character related API calls.
             </summary>
@@ -28,7 +28,7 @@
             Checks for an empty IHeaderCustomerGUID.
             </remarks>
         </member>
-        <member name="M:OWSPublicAPI.Controllers.CharactersController.GetByName(OWSPublicAPI.DTOs.GetByNameDTO)">
+        <member name="M:OWSPublicAPI.Controllers.CharactersController.PublicGetByNameRequest(OWSPublicAPI.DTOs.GetByNameDTO)">
             <summary>
             Get Characters Data by Character Name.
             </summary>

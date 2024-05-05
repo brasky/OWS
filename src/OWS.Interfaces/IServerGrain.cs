@@ -4,6 +4,6 @@ namespace OWS.Interfaces
 {
     public interface IUserGrain : IGrainWithGuidKey
     {
-        Task<GetUserSession> GetUserSessionAsync(Guid customerGuid);
+        Task<GetUserSession> GetUserSessionAsync();
     }
 }
