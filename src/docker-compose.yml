@@ -51,7 +51,7 @@ services:
       service: rabbitmq
 
   owssilo:
-    image: ${REGISTRY:-ows}/owspublicapi:${PLATFORM:-linux}-${TAG:-latest}
+    image: ${REGISTRY:-ows}/owssilo:${PLATFORM:-linux}-${TAG:-latest}
     build:
       context: .
       dockerfile: OWS.API.Silo/Dockerfile
@@ -93,94 +93,7 @@ services:
     depends_on:
       - database
       - messaging
-
-  # OWS Instance Management 
-  # owsinstancemanagement:
-  #   image: ${REGISTRY:-ows}/owsinstancemanagement:${PLATFORM:-linux}-${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: OWSInstanceManagement/Dockerfile
-  #   environment:
-  #    - OWSStorageConfig__OWSDBBackend=${DATABASE}
-  #    - OWSStorageConfig__OWSDBConnectionString=${DATABASE_CONNECTION_STRING}
-  #    - OWSAPIPathConfig__InternalPublicApiURL=${InternalPublicApiURL}
-  #    - OWSAPIPathConfig__InternalInstanceManagementApiURL=${InternalInstanceManagementApiURL}
-  #    - OWSAPIPathConfig__InternalCharacterPersistenceApiURL=${InternalCharacterPersistenceApiURL}
-  #    - RabbitMQOptions__RabbitMQHostName=${RabbitMQHostName}
-  #    - RabbitMQOptions__RabbitMQPort=${RabbitMQPort}
-  #    - RabbitMQOptions__RabbitMQUserName=${RabbitMQUserName}
-  #    - RabbitMQOptions__RabbitMQPassword=${RabbitMQPassword}
-  #   ports:
-  #     - "44328:80"
-  #     - "44329:443"
-  #   depends_on:
-  #     - database
-  #     - messaging
-
-  # OWS Character Persistence
-  # owscharacterpersistence:
-  #   image: ${REGISTRY:-ows}/owscharacterpersistence:${PLATFORM:-linux}-${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: OWSCharacterPersistence/Dockerfile
-  #   environment:
-  #    - OWSStorageConfig__OWSDBBackend=${DATABASE}
-  #    - OWSStorageConfig__OWSDBConnectionString=${DATABASE_CONNECTION_STRING}
-  #    - OWSAPIPathConfig__InternalPublicApiURL=${InternalPublicApiURL}
-  #    - OWSAPIPathConfig__InternalInstanceManagementApiURL=${InternalInstanceManagementApiURL}
-  #    - OWSAPIPathConfig__InternalCharacterPersistenceApiURL=${InternalCharacterPersistenceApiURL}
-  #    - RabbitMQOptions__RabbitMQHostName=${RabbitMQHostName}
-  #    - RabbitMQOptions__RabbitMQPort=${RabbitMQPort}
-  #    - RabbitMQOptions__RabbitMQUserName=${RabbitMQUserName}
-  #    - RabbitMQOptions__RabbitMQPassword=${RabbitMQPassword}
-  #   ports:
-  #     - "44323:80"
-  #     - "44324:443"
-  #   depends_on:
-  #     - database
-  #     - messaging
-
-  # OWS Global Data
-  # owsglobaldata:
-  #   image: ${REGISTRY:-ows}/owsglobaldata:${PLATFORM:-linux}-${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: OWSGlobalData/Dockerfile
-  #   environment:
-  #    - OWSStorageConfig__OWSDBBackend=${DATABASE}
-  #    - OWSStorageConfig__OWSDBConnectionString=${DATABASE_CONNECTION_STRING}
-  #    - OWSAPIPathConfig__InternalPublicApiURL=${InternalPublicApiURL}
-  #    - OWSAPIPathConfig__InternalInstanceManagementApiURL=${InternalInstanceManagementApiURL}
-  #    - OWSAPIPathConfig__InternalCharacterPersistenceApiURL=${InternalCharacterPersistenceApiURL}
-  #    - RabbitMQOptions__RabbitMQHostName=${RabbitMQHostName}
-  #    - RabbitMQOptions__RabbitMQPort=${RabbitMQPort}
-  #    - RabbitMQOptions__RabbitMQUserName=${RabbitMQUserName}
-  #    - RabbitMQOptions__RabbitMQPassword=${RabbitMQPassword}
-  #   ports:
-  #     - "44325:80"
-  #     - "44326:443"
-  #   depends_on:
-  #     - database
-  #     - messaging
-
-  # OWS Management
-  # owsmanagement:
-  #   image: ${REGISTRY:-ows}/owsmanagement:${PLATFORM:-linux}-${TAG:-latest}
-  #   build:
-  #     context: .
-  #     dockerfile: OWSManagement/Dockerfile
-  #   environment:
-  #    - OWSStorageConfig__OWSDBBackend=${DATABASE}
-  #    - OWSStorageConfig__OWSDBConnectionString=${DATABASE_CONNECTION_STRING}
-  #    - OWSAPIPathConfig__InternalPublicApiURL=${InternalPublicApiURL}
-  #    - OWSAPIPathConfig__InternalInstanceManagementApiURL=${InternalInstanceManagementApiURL}
-  #    - OWSAPIPathConfig__InternalCharacterPersistenceApiURL=${InternalCharacterPersistenceApiURL}
-  #   ports:
-  #     - "44410:80"
-  #     - "44411:443"
-  #   depends_on:
-  #     - database
-  #     - messaging
+      - owssilo
 
 networks:
   elk:

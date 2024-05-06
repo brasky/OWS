@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -12,7 +7,6 @@ using Orleans;
 using Orleans.Hosting;
 using Orleans.Runtime;
 using OWSShared.Interfaces;
-using OWSShared.Middleware;
 using OWSShared.Options;
 using Serilog;
 

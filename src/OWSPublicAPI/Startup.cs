@@ -153,8 +153,6 @@ namespace OWSPublicAPI
             services.AddSingleton<IPublicAPIInputValidation, DefaultPublicAPIInputValidation>();
             services.AddSingleton<ICustomCharacterDataSelector, DefaultCustomCharacterDataSelector>();
             services.AddSingleton<IGetReadOnlyPublicCharacterData, DefaultGetReadOnlyPublicCharacterData>();
-
-            //InstanceLauncherStartup.InitializeContainer(services);
         }
     }
 }
