@@ -22,13 +22,14 @@ Open World Server (OWS) is a server instance manager designed to create large wo
 | Project                                                         | Purpose                                                            |
 |-----------------------------------------------------------------|--------------------------------------------------------------------|
 | [Benchmarks](src/OWSBenchmarks)                                 | This project will allow us to configure and run performance testing on the OWS API.  This will be important for comparing the impact of certain changes. |
-| [Character Persistence](src/OWSCharacterPersistence)            | The Character Persistence API will be responsible for storing our player characters and all related data.  This will be important for comparing the impact of certain changes. |
+| [Performance Tests](src/OWS.PerfTests)                                 | This project contains the [K6](https://grafana.com/docs/k6/latest/) load test files. |
 | [Data](src/OWSData)                                             | This is a shared project that houses our data repository access code. |
-| [External Login Providers](src/OWSExternalLoginProviders)       | This project contains code for integrating with external login providers such as Xsolla, Google, Facebook, etc. |
 | [Instance Launcher](src/OWSInstanceLauncher)                    | This project builds our Instance Launcher that replaces the RPG World Server in OWS 1. |
-| [Instance Management](src/OWSInstanceManagement)                | This API manages Zone Instances and the OWS Instance Launchers. |
-| [Public API](src/OWSPublicAPI)                                  | This API handles all API calls that come directly from player clients such as registration, login, and connecting to the game. |
+| [Public API](src/OWSPublicAPI)                                  | This API handles all incoming requests to the service and sends grains to the Silo project to execute |
 | [Shared](src/OWSShared)                                         | This project houses various miscellaneous code that multiple other projects require. |
+| [Silo](src/OWS.API.Silo)                                         | This project provides the compute runtime for our [Orleans silos](https://learn.microsoft.com/en-us/dotnet/orleans/overview), this is where grains are executed. |
+| [Interfaces](src/OWS.Interfaces)                                           | This project is where the contracts are defined for communication from the Public API to the Orleans Silos |
+| [Grains](src/OWS.Grains)                                           | This project is where the implementation for each [Grain](https://learn.microsoft.com/en-us/dotnet/orleans/overview#what-are-grains) is defined.|
 | [Tests](src/OWSTests)                                           | This project provides Unit testing and Functional testing and Benchmark Tools (Development) |
 
 # Contributing
