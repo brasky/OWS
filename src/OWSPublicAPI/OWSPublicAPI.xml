@@ -736,12 +736,60 @@
             Overrides IRequestHandler Handle().
             </remarks>
         </member>
+        <member name="M:OWSGlobalData.Controllers.GlobalDataController.AddOrUpdateGlobalDataItem(OWSGlobalData.DTOs.AddOrUpdateGlobalDataItemDTO)">
+            <summary>
+            Add an item to Global Data
+            </summary>
+            <remarks>
+            Adds or updates a key/value pair to the Global Data system.
+            </remarks>
+        </member>
+        <member name="M:OWSGlobalData.Controllers.GlobalDataController.GetGlobalDataItem(System.String)">
+            <summary>
+            Gets an item from Global Data
+            </summary>
+            <remarks>
+            Gets an item from the Global Data system by looking it up based on globalDataKey
+            </remarks>
+        </member>
         <member name="M:OWSInstanceManagement.Controllers.InstanceController.GetZoneInstance(System.Int32)">
             <summary>
             GetZoneInstance
             </summary>
             <remarks>
             Get information on the server instance that matches the ZoneInstanceId in the POST data
+            </remarks>
+        </member>
+        <member name="T:OWSInstanceManagement.Controllers.ZonesController">
+            <summary>
+            Zones Controller
+            </summary>
+            <remarks>
+            Controller for Handling Zone related requests.
+            </remarks>
+        </member>
+        <member name="M:OWSInstanceManagement.Controllers.ZonesController.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
+            <summary>
+            Zones Controller - OnActionExecuting
+            </summary>
+            <remarks>
+            OnActionExecuting
+            </remarks>
+        </member>
+        <member name="M:OWSInstanceManagement.Controllers.ZonesController.#ctor(OWSData.Repositories.Interfaces.IInstanceManagementRepository,OWSData.Repositories.Interfaces.ICharactersRepository,Microsoft.Extensions.Options.IOptions{OWSShared.Options.RabbitMQOptions},OWSShared.Interfaces.IHeaderCustomerGUID)">
+            <summary>
+            Zones Controller - Constructor
+            </summary>
+            <remarks>
+            Setup for dependency injection.
+            </remarks>
+        </member>
+        <member name="M:OWSInstanceManagement.Controllers.ZonesController.AddZone(OWSInstanceManagement.Requests.Zones.AddZoneRequest)">
+            <summary>
+            Add a Zone
+            </summary>
+            <remarks>
+            Add a Zone to the Maps table.
             </remarks>
         </member>
         <member name="T:OWSInstanceManagement.Requests.Instance.GetCurrentWorldTimeRequest">

@@ -28,7 +28,6 @@ namespace OWSInstanceManagement.Controllers
     [ApiController]
     public class ZonesController : Controller
     {
-        private readonly Container _container;
         private readonly IInstanceManagementRepository _instanceManagementRepository;
         private readonly ICharactersRepository _charactersRepository;
         private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
@@ -42,12 +41,6 @@ namespace OWSInstanceManagement.Controllers
         /// </remarks>
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            IHeaderCustomerGUID customerGuid = _container.GetInstance<IHeaderCustomerGUID>();
-
-            if (customerGuid.CustomerGUID == Guid.Empty)
-            {
-                context.Result = new UnauthorizedResult();
-            }
         }
 
         /// <summary>
@@ -56,13 +49,12 @@ namespace OWSInstanceManagement.Controllers
         /// <remarks>
         /// Setup for dependency injection.
         /// </remarks>
-        public ZonesController(Container container,
+        public ZonesController(
             IInstanceManagementRepository instanceManagementRepository,
             ICharactersRepository charactersRepository,
             IOptions<RabbitMQOptions> rabbitMQOptions,
             IHeaderCustomerGUID customerGuid)
         {
-            _container = container;
             _instanceManagementRepository = instanceManagementRepository;
             _charactersRepository = charactersRepository;
             _rabbitMQOptions = rabbitMQOptions;

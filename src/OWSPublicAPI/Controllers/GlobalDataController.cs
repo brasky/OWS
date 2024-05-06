@@ -35,10 +35,6 @@ namespace OWSGlobalData.Controllers
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (_customerGuid.CustomerGUID == Guid.Empty)
-            {
-                context.Result = new UnauthorizedResult();
-            }
         }
 
         /// <summary>
