@@ -17,6 +17,7 @@ using Serilog;
 using OWSGlobalData.DTOs;
 using OWSGlobalData.Requests;
 using OWSData.Models.Tables;
+using Orleans;
 
 namespace OWSGlobalData.Controllers
 {
@@ -24,13 +25,15 @@ namespace OWSGlobalData.Controllers
     [ApiController]
     public class GlobalDataController : Controller
     {
+        private readonly IClusterClient _clusterClient;
         private readonly IGlobalDataRepository _globalDataRepository;
         private readonly IHeaderCustomerGUID _customerGuid;
 
-        public GlobalDataController(IGlobalDataRepository globalDataRepository, IHeaderCustomerGUID customerGuid)
+        public GlobalDataController(IGlobalDataRepository globalDataRepository, IHeaderCustomerGUID customerGuid, IClusterClient clusterClient)
         {
             _globalDataRepository = globalDataRepository;
             _customerGuid = customerGuid;
+            _clusterClient = clusterClient;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
