@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using OWSData.Models.Composites;
 using OWSData.Repositories.Interfaces;
 using OWSShared.Interfaces;
-using OWSPublicAPI.DTOs;
+using OWSShared.DTOs;
 
 namespace OWSPublicAPI.Requests.Users
 {

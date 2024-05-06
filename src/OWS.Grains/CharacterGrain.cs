@@ -41,29 +41,31 @@ namespace OWS.Grains
             _getReadOnlyPublicCharacterData = getReadOnlyPublicCharacterData;
         }
 
-        public async Task<CreateCharacter> Create(Guid userSessionId, string className)
+        private string ValidateCharacterName()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
             var charName = this.GetPrimaryKeyString();
-
             string errorMessage = string.Empty;
             //Test for empty Character Names or Character Names that are shorter than the minimum Character name Length
             if (String.IsNullOrEmpty(charName) || charName.Length < 4)
             {
-                errorMessage = "Please enter a valid Character Name that is at least 4 characters in length.";
+                return "Please enter a valid Character Name that is at least 4 characters in length.";
             }
 
             Regex regex = new Regex(@"^\w+$");
             //Test for Character Names that use characters other than Letters (uppercase and lowercase) and Numbers.
             if (!regex.IsMatch(charName))
             {
-                errorMessage = "Please enter a Character Name that only contains letters and numbers.";
+                return "Please enter a Character Name that only contains letters and numbers.";
             }
 
+            return string.Empty;
+        }
+
+        public async Task<CreateCharacter> Create(Guid userSessionId, string className)
+        {
+            Guid customerGuid = GetCustomerId();
+
+            var errorMessage = ValidateCharacterName();
             if (!String.IsNullOrEmpty(errorMessage))
             {
                 CreateCharacter createCharacterErrorMessage = new CreateCharacter();
@@ -71,9 +73,52 @@ namespace OWS.Grains
                 return createCharacterErrorMessage;
             }
 
-            var output = await _usersRepository.CreateCharacter(customerGuid, userSessionId, charName, className);
+            var output = await _usersRepository.CreateCharacter(customerGuid, userSessionId, this.GetPrimaryKeyString(), className);
 
             return output;
+        }
+
+        public async Task<SuccessAndErrorMessage> CreateUsingDefaultCharacterValues(Guid userSessionId, string defaultSetName)
+        {
+            Guid customerGuid = GetCustomerId();
+
+            //Validate Character Name
+            string errorMessage = ValidateCharacterName();
+            if (!String.IsNullOrEmpty(errorMessage))
+            {
+                SuccessAndErrorMessage successAndErrorMessage = new SuccessAndErrorMessage();
+                successAndErrorMessage.Success = false;
+                successAndErrorMessage.ErrorMessage = errorMessage;
+                return successAndErrorMessage;
+            }
+
+            var charName = this.GetPrimaryKeyString();
+            //Make sure Character Name is Unique
+            var characterToLookup = await _charactersRepository.GetCharByCharName(customerGuid, charName);
+
+            if (characterToLookup != null && characterToLookup.UserGuid != Guid.Empty)
+            {
+                SuccessAndErrorMessage successAndErrorMessage = new SuccessAndErrorMessage();
+                successAndErrorMessage.Success = false;
+                successAndErrorMessage.ErrorMessage = "Character name already exists!";
+                return successAndErrorMessage;
+            }
+
+            //Get User Session
+            var userSession = await _usersRepository.GetUserSession(customerGuid, userSessionId);
+
+            if (userSession == null || !userSession.UserGuid.HasValue)
+            {
+                SuccessAndErrorMessage successAndErrorMessage = new SuccessAndErrorMessage();
+                successAndErrorMessage.Success = false;
+                successAndErrorMessage.ErrorMessage = "Invalid User Session";
+                return successAndErrorMessage;
+            }
+
+            await _usersRepository.CreateCharacterUsingDefaultCharacterValues(customerGuid, userSession.UserGuid.Value, charName,
+                defaultSetName);
+
+            return new SuccessAndErrorMessage() { Success = true, ErrorMessage = "" };
         }
 
         public async Task<CharacterAndCustomData> PublicGetByNameRequest(Guid userSessionId)
@@ -146,11 +191,8 @@ namespace OWS.Grains
         public async Task<JoinMapByCharName> GetServerToConnectTo(string zoneName, int playerGroupType)
         {
             var Output = new JoinMapByCharName();
-            
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+
+            Guid customerGuid = GetCustomerId();
 
             //If ZoneName is empty, look it up from the character.  This is used for the inital login.
             if (String.IsNullOrEmpty(zoneName) || zoneName == "GETLASTZONENAME")
@@ -267,30 +309,21 @@ namespace OWS.Grains
 
         public async Task AddOrUpdateCustomData(AddOrUpdateCustomCharacterData request)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+            Guid customerGuid = GetCustomerId();
 
             await _charactersRepository.AddOrUpdateCustomCharacterData(customerGuid, request);
         }
 
         public async Task<GetCharByCharName> GetByName()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+            Guid customerGuid = GetCustomerId();
 
             return await _charactersRepository.GetCharByCharName(customerGuid, this.GetPrimaryKeyString());
         }
 
         public async Task<CustomCharacterDataRows> GetCustomData()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+            Guid customerGuid = GetCustomerId();
 
             CustomCharacterDataRows output = new CustomCharacterDataRows();
 
@@ -324,12 +357,86 @@ namespace OWS.Grains
 
         public async Task Logout()
         {
+            Guid customerGuid = GetCustomerId();
+
+            await _charactersRepository.PlayerLogout(customerGuid, this.GetPrimaryKeyString());
+        }
+
+        public async Task<SuccessAndErrorMessage> AddAbilityToCharacter(string abilityName, int abilityLevel, string charHasAbilitiesCustomJson)
+        {
+            Guid customerGuid = GetCustomerId();
+
+            var output = new SuccessAndErrorMessage();
+            await _charactersRepository.AddAbilityToCharacter(customerGuid, abilityName, characterName: this.GetPrimaryKeyString(), abilityLevel, charHasAbilitiesCustomJson);
+
+            output.Success = true;
+            output.ErrorMessage = "";
+
+            return output;
+        }
+
+        public async Task<IEnumerable<GetCharacterAbilities>> GetCharacterAbilities()
+        {
+            Guid customerGuid = GetCustomerId();
+
+            return await _charactersRepository.GetCharacterAbilities(customerGuid, characterName: this.GetPrimaryKeyString());
+        }
+
+        public async Task<IEnumerable<Abilities>> GetAbilities()
+        {
+            Guid customerGuid = GetCustomerId();
+
+            return await _charactersRepository.GetAbilities(customerGuid);
+        }
+
+        public async Task<IEnumerable<GetAbilityBars>> GetAbilityBars()
+        {
+            Guid customerGuid = GetCustomerId();
+
+            return await _charactersRepository.GetAbilityBars(customerGuid, this.GetPrimaryKeyString());
+        }
+
+        public async Task<IEnumerable<GetCharacterAbilities>> GetAbilityBarsAndAbilities()
+        {
+            Guid customerGuid = GetCustomerId();
+
+            return await _charactersRepository.GetCharacterAbilities(customerGuid, this.GetPrimaryKeyString());
+        }
+
+        public async Task<SuccessAndErrorMessage> RemoveAbilityFromCharacter(string abilityName)
+        {
+            Guid customerGuid = GetCustomerId();
+
+            var output = new SuccessAndErrorMessage();
+            await _charactersRepository.RemoveAbilityFromCharacter(customerGuid, abilityName, this.GetPrimaryKeyString());
+
+            output.Success = true;
+            output.ErrorMessage = "";
+
+            return output;
+        }
+
+        public async Task<SuccessAndErrorMessage> UpdateAbilityOnCharacter(string abilityName, int abilityLevel, string charHasAbilitiesCustomJson)
+        {
+            Guid customerGuid = GetCustomerId();
+            
+            var output = new SuccessAndErrorMessage();
+            await _charactersRepository.UpdateAbilityOnCharacter(customerGuid, abilityName, this.GetPrimaryKeyString(), abilityLevel, charHasAbilitiesCustomJson);
+
+            output.Success = true;
+            output.ErrorMessage = "";
+
+            return output;
+        }
+
+        private static Guid GetCustomerId()
+        {
             if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
             {
                 throw new ArgumentException("Invalid Customer ID");
             }
 
-            await _charactersRepository.PlayerLogout(customerGuid, this.GetPrimaryKeyString());
+            return customerGuid;
         }
     }
 }

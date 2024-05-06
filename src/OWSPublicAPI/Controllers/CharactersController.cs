@@ -6,8 +6,8 @@ using OWS.Interfaces;
 using OWSCharacterPersistence.Requests.Characters;
 using OWSData.Models.Composites;
 using OWSData.Models.StoredProcs;
-using OWSPublicAPI.DTOs;
 using OWSPublicAPI.Requests.Characters;
+using OWSShared.DTOs;
 using System;
 using System.Threading.Tasks;
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OWSPublicAPI.DTOs
+namespace OWSShared.DTOs
 {
 
     public class LogoutDTO

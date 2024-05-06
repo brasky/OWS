@@ -1,27 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
-using SimpleInjector;
 using OWSData.Repositories.Interfaces;
 using OWSData.Models.Composites;
 using OWSData.Models.StoredProcs;
 using OWSShared.Interfaces;
 using OWSPublicAPI.Requests.Users;
-using OWSExternalLoginProviders.Interfaces;
 using OWSShared.Options;
 using Microsoft.Extensions.Options;
 using System.Net.Http;
-using OWSData.Models.Tables;
 using Microsoft.Extensions.Logging;
-using OWSPublicAPI.DTOs;
 using Orleans;
 using OWS.Interfaces;
+using OWSShared.DTOs;
 
 namespace OWSPublicAPI.Controllers
 {
@@ -101,11 +92,10 @@ namespace OWSPublicAPI.Controllers
         [HttpPost]
         [Route("CreateCharacterUsingDefaultCharacterValues")]
         [Produces(typeof(SuccessAndErrorMessage))]
-        public async Task<SuccessAndErrorMessage> CreateCharacterUsingDefaultCharacterValues([FromBody] CreateCharacterUsingDefaultCharacterValuesDTO createCharacterUsingDefaultCharacterValuesDTO)
+        public async Task<SuccessAndErrorMessage> CreateCharacterUsingDefaultCharacterValues([FromBody] CreateCharacterUsingDefaultCharacterValuesDTO request)
         {
-            CreateCharacterUsingDefaultCharacterValuesRequest request = 
-                new CreateCharacterUsingDefaultCharacterValuesRequest(createCharacterUsingDefaultCharacterValuesDTO, _usersRepository, _charactersRepository, _publicAPIInputValidation, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<ICharacterGrain>(request.CharacterName);
+            return await grain.CreateUsingDefaultCharacterValues(request.UserSessionGUID, request.DefaultSetName);
         }
 
         /// <summary>
@@ -120,8 +110,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetAllCharacters))]
         public async Task<IActionResult> GetAllCharacters([FromBody] GetAllCharactersRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            return new OkObjectResult(await grain.GetAllCharacters());
         }
 
         /// <summary>
@@ -137,8 +127,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetPlayerGroupsCharacterIsIn))]
         public async Task<IActionResult> GetPlayerGroupsCharacterIsIn([FromBody] GetPlayerGroupsCharacterIsInRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            return new OkObjectResult(await grain.GetPlayerGroupsCharacterIsIn(request.CharacterName, request.PlayerGroupTypeID));
         }
 
         /// <summary>
@@ -190,8 +180,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(PlayerLoginAndCreateSession))]
         public async Task<IActionResult> LoginAndCreateSession([FromBody] LoginAndCreateSessionRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(Guid.NewGuid());
+            return new OkObjectResult(grain.LoginAndCreateSession(request.Email, request.Password));
         }
 
         /// <summary>
@@ -218,8 +208,13 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<SuccessAndErrorMessage> Logout([FromBody] LogoutDTO request)
         {
-            LogoutRequest logoutRequest = new LogoutRequest(request, _usersRepository, _customerGuid);
-            return await logoutRequest.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(Guid.NewGuid());
+            await grain.Logout();
+
+            return new SuccessAndErrorMessage()
+            {
+                Success = true,
+            };
         }
 
         /// <summary>
@@ -233,8 +228,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<IActionResult> UserSessionSetSelectedCharacter([FromBody] UserSessionSetSelectedCharacterRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            return new OkObjectResult(await grain.UserSessionSetSelectedCharacter(request.SelectedCharacterName));
         }
 
         /// <summary>
@@ -245,8 +240,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(GetUserSession))]
         public async Task<IActionResult> SetSelectedCharacterAndGetUserSession([FromBody] SetSelectedCharacterAndGetUserSessionRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            return new OkObjectResult(await grain.SetSelectedCharacterAndGetUserSession(request.SelectedCharacterName));
         }
 
         /// <summary>
@@ -260,6 +255,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(PlayerLoginAndCreateSession))]
         public async Task<PlayerLoginAndCreateSession> RegisterUser([FromBody] RegisterUserDTO requestDTO)
         {
+            var grain = _clusterClient.GetGrain<IUserGrain>(Guid.NewGuid());
+            return await grain.RegisterUser(requestDTO);
             RegisterUserRequest request = new RegisterUserRequest(requestDTO, _usersRepository, _customerGuid);
             return await request.Handle();
         }

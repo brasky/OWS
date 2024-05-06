@@ -1,4 +1,4 @@
-﻿namespace OWSPublicAPI.DTOs
+﻿namespace OWSShared.DTOs
 {
     /// <summary>
     /// GetByNameDTO data transfer object

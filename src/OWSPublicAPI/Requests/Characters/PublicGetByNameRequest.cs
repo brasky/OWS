@@ -8,7 +8,7 @@ using OWSData.Models.Composites;
 using OWSData.Models.StoredProcs;
 using OWSData.Models.Tables;
 using OWSData.Repositories.Interfaces;
-using OWSPublicAPI.DTOs;
+using OWSShared.DTOs;
 using OWSShared.Interfaces;
 
 namespace OWSPublicAPI.Requests.Characters

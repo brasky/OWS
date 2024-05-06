@@ -1,7 +1,7 @@
 ﻿using OWSData.Models.Composites;
 using OWSData.Repositories.Implementations.MSSQL;
 using OWSData.Repositories.Interfaces;
-using OWSPublicAPI.DTOs;
+using OWSShared.DTOs;
 using OWSShared.Interfaces;
 using System;
 using System.Threading.Tasks;

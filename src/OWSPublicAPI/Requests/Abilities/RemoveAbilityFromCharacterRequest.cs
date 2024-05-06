@@ -30,26 +30,5 @@ namespace OWSCharacterPersistence.Requests.Abilities
         /// This is the name of the character to add the ability to.
         /// </remarks>
         public string CharacterName { get; set; }
-
-        private SuccessAndErrorMessage output;
-        private Guid customerGUID;
-        private ICharactersRepository charactersRepository;
-
-        public void SetData(ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid)
-        {
-            this.charactersRepository = charactersRepository;
-            customerGUID = customerGuid.CustomerGUID;
-        }
-
-        public async Task<SuccessAndErrorMessage> Handle()
-        {
-            output = new SuccessAndErrorMessage();
-            await charactersRepository.RemoveAbilityFromCharacter(customerGUID, AbilityName, CharacterName);
-
-            output.Success = true;
-            output.ErrorMessage = "";
-
-            return output;
-        }
     }
 }

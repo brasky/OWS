@@ -24,24 +24,5 @@ namespace OWSCharacterPersistence.Requests.Characters
         /// This is the name of the character to get Custom Data fields for.
         /// </remarks>
         public string CharacterName { get; set; }
-
-        private Guid customerGUID;
-        private ICharactersRepository charactersRepository;
-
-        public void SetData(ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid)
-        {
-            this.charactersRepository = charactersRepository;
-            customerGUID = customerGuid.CustomerGUID;
-        }
-
-        public async Task<CustomCharacterDataRows> Handle()
-        {
-            CustomCharacterDataRows output = new CustomCharacterDataRows();
-
-            output.Rows = await charactersRepository.GetCustomCharacterData(customerGUID, CharacterName);
-
-            return output;
-        }
-
     }
 }

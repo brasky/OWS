@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using OWSData.Models.StoredProcs;
-using OWSPublicAPI.DTOs;
+using OWSShared.DTOs;
 
 namespace OWSPublicAPI.Requests.Users
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OWSPublicAPI.DTOs
+namespace OWSShared.DTOs
 {
     /// <summary>
     /// CreateCharacterUsingDefaultCharacterValues Data Transfer Object

@@ -23,22 +23,5 @@ namespace OWSCharacterPersistence.Requests.Abilities
         /// This is the name of the character to get ability bars and abilities for.
         /// </remarks>
         public string CharacterName { get; set; }
-
-        private IEnumerable<OWSData.Models.StoredProcs.GetAbilityBarsAndAbilities> output;
-        private Guid customerGUID;
-        private ICharactersRepository charactersRepository;
-
-        public void SetData(ICharactersRepository charactersRepository, IHeaderCustomerGUID customerGuid)
-        {
-            this.charactersRepository = charactersRepository;
-            customerGUID = customerGuid.CustomerGUID;
-        }
-
-        public async Task<IActionResult> Handle()
-        {
-            output = await charactersRepository.GetAbilityBarsAndAbilities(customerGUID, CharacterName);
-
-            return new OkObjectResult(output);
-        }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace OWSPublicAPI.DTOs
+﻿namespace OWSShared.DTOs
 {
     /// <summary>
     /// RegisterUser Data Transfer Object
