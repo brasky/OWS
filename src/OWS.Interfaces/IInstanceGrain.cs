@@ -6,6 +6,7 @@ namespace OWS.Interfaces
 {
     public interface IInstanceGrain : IGrainWithGuidKey
     {
+        Task<SuccessAndErrorMessage> AddOrUpdateZone(AddOrUpdateZoneRequestPayload request);
         Task<GetCurrentWorldTime> GetCurrentWorldTime();
         Task<GetServerInstanceFromPort> GetServerInstanceFromPort(string ipAddress, int port);
         Task<GetServerInstanceFromPort> GetZoneInstance(int zoneInstanceId);

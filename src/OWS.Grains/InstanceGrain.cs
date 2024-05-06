@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Orleans.Concurrency;
 using OWS.Interfaces;
 using OWSData.Models.Composites;
 using OWSData.Models.StoredProcs;
-using OWSData.Models.Tables;
 using OWSData.Repositories.Interfaces;
-using OWSShared.Interfaces;
 using OWSShared.Messages;
 using OWSShared.Options;
 using OWSShared.RequestPayloads;
@@ -15,7 +11,6 @@ using RabbitMQ.Client;
 
 namespace OWS.Grains
 {
-    [StatelessWorker]
     public sealed class InstanceGrain : BaseGrain, IInstanceGrain
     {
         private readonly ILogger<ServerGrain> _logger;
@@ -29,7 +24,6 @@ namespace OWS.Grains
             ICharactersRepository charactersRepository,
             IOptions<RabbitMQOptions> rabbitMQOptions)
         {
-            //_userSession = userSession;
             _logger = logger;
             _instanceManagementRepository = instanceManagementRepository;
             _charactersRepository = charactersRepository;
@@ -185,6 +179,19 @@ namespace OWS.Grains
         public async Task<GetCurrentWorldTime> GetCurrentWorldTime()
         {
             return await _instanceManagementRepository.GetCurrentWorldTime(GetCustomerId());
+        }
+
+        public async Task<SuccessAndErrorMessage> AddOrUpdateZone(AddOrUpdateZoneRequestPayload request)
+        {
+            return await _instanceManagementRepository.AddZone(
+                GetCustomerId(),
+                request.MapName,
+                request.ZoneName,
+                request.WorldCompContainsFilter,
+                request.WorldCompListFilter,
+                request.SoftPlayerCap,
+                request.HardPlayerCap,
+                request.MapMode);
         }
     }
 }

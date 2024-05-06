@@ -111,6 +111,11 @@ namespace OWS.Grains
             return playerLoginAndCreateSession;
         }
 
+        public async Task<SuccessAndErrorMessage> RemoveCharacter(string characterName)
+        {
+            return await _usersRepository.RemoveCharacter(GetCustomerId(), this.GetPrimaryKey(), characterName);
+        }
+
         public async Task Logout()
         {
             await _usersRepository.Logout(GetCustomerId(), this.GetPrimaryKey());

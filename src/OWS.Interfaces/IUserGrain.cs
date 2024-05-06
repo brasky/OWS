@@ -12,6 +12,7 @@ namespace OWS.Interfaces
         Task<PlayerLoginAndCreateSession> LoginAndCreateSession(string email, string password);
         Task Logout();
         Task<PlayerLoginAndCreateSession> RegisterUser(RegisterUserDTO registerUserDto);
+        Task<SuccessAndErrorMessage> RemoveCharacter(string characterName);
         Task<GetUserSession> SetSelectedCharacterAndGetUserSession(string selectedCharacterName);
         Task<SuccessAndErrorMessage> UserSessionSetSelectedCharacter(string selectedCharacterName);
     }

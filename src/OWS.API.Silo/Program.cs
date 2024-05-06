@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OWSData.Repositories.Interfaces;
 using OWSShared.Options;
-using OWS.Silo;
 using OWSShared.Implementations;
 using OWSShared.Interfaces;
 
@@ -12,8 +11,6 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
     .AddEnvironmentVariables()
     .Build();
-
-InstanceLauncherStartup.AddInstanceLauncherStartupOptions(configuration);
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
@@ -31,14 +28,21 @@ builder.Services.Configure<OWSShared.Options.RabbitMQOptions>(builder.Configurat
 
 builder.UseOrleans(silo =>
 {
-    silo.UseInMemoryReminderService();
-    
-    silo.UseLocalhostClustering();
+    //Long term we shouldnt use our main SQL DB for clustering, for development we could use UseLocalhostClustering()
+    //but to be able to demonstrate scaling in docker locally we are using SQL.
+    silo.UseAdoNetClustering(options =>
+    {
+        options.Invariant = "Microsoft.Data.SqlClient";
+        options.ConnectionString = storageOptions.OWSDBConnectionString;
+    });
+
+    //This is currently unused but just to show how you could configure persistence backed by SQL
     silo.AddAdoNetGrainStorage("OrleansStorage", options =>
     {
         options.Invariant = "Microsoft.Data.SqlClient";
         options.ConnectionString = storageOptions.OWSDBConnectionString;
     });
+    silo.UseInMemoryReminderService();
     silo.UseDashboard();
 });
 
@@ -65,13 +69,10 @@ switch (storageOptions.OWSDBBackend)
 builder.Services.AddLogging();
 builder.Logging.AddConsole();
 
-InstanceLauncherStartup.ConfigureInstanceLauncherServices(builder.Services);
 builder.Services.AddSingleton<IZoneServerProcessesRepository, OWSData.Repositories.Implementations.InMemory.ZoneServerProcessesRepository>();
 builder.Services.AddSingleton<IOWSInstanceLauncherDataRepository, OWSData.Repositories.Implementations.InMemory.OWSInstanceLauncherDataRepository>();
 builder.Services.AddSingleton<ICustomCharacterDataSelector, DefaultCustomCharacterDataSelector>();
 builder.Services.AddSingleton<IGetReadOnlyPublicCharacterData, DefaultGetReadOnlyPublicCharacterData>();
 
 using IHost host = builder.Build();
-
-
 await host.RunAsync();

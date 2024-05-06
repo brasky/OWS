@@ -258,8 +258,6 @@ namespace OWSPublicAPI.Controllers
         {
             var grain = _clusterClient.GetGrain<IUserGrain>(Guid.NewGuid());
             return await grain.RegisterUser(requestDTO);
-            RegisterUserRequest request = new RegisterUserRequest(requestDTO, _usersRepository, _customerGuid);
-            return await request.Handle();
         }
 
         /// <summary>
@@ -273,8 +271,8 @@ namespace OWSPublicAPI.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<IActionResult> RemoveCharacter([FromBody] RemoveCharacterRequest request)
         {
-            request.SetData(_usersRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IUserGrain>(request.UserSessionGUID);
+            return new OkObjectResult(await grain.RemoveCharacter(request.CharacterName));
         }
     }
 }

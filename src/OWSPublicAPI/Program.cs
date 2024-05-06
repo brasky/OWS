@@ -13,6 +13,7 @@ using Orleans.Hosting;
 using Orleans.Runtime;
 using OWSShared.Interfaces;
 using OWSShared.Middleware;
+using OWSShared.Options;
 using Serilog;
 
 namespace OWSPublicAPI
@@ -42,9 +43,17 @@ namespace OWSPublicAPI
             try
             {
                 CreateHostBuilder(args)
-                    .UseOrleansClient(client =>
+                    .UseOrleansClient((host, client)=>
                     {
-                        client.UseLocalhostClustering();
+                        OWSStorageConfig storageOptions = new();
+                        host.Configuration.GetSection(nameof(OWSStorageConfig)).Bind(storageOptions);
+
+                        client.UseAdoNetClustering(options =>
+                        {
+                            options.Invariant = "Microsoft.Data.SqlClient";
+                            options.ConnectionString = storageOptions.OWSDBConnectionString;
+                        });
+                        //client.UseLocalhostClustering();
                         client.AddOutgoingGrainCallFilter<CustomerIdClientFilter>();
                     })
                     .Build().Run();

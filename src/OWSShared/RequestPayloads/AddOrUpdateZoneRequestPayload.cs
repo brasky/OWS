@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Orleans;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace OWSShared.RequestPayloads
 {
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
+
     public class AddOrUpdateZoneRequestPayload
     {
         public Guid CustomerGUID { get; set; }

@@ -776,7 +776,7 @@
             OnActionExecuting
             </remarks>
         </member>
-        <member name="M:OWSInstanceManagement.Controllers.ZonesController.#ctor(OWSData.Repositories.Interfaces.IInstanceManagementRepository,OWSData.Repositories.Interfaces.ICharactersRepository,Microsoft.Extensions.Options.IOptions{OWSShared.Options.RabbitMQOptions},OWSShared.Interfaces.IHeaderCustomerGUID)">
+        <member name="M:OWSInstanceManagement.Controllers.ZonesController.#ctor(Orleans.IClusterClient)">
             <summary>
             Zones Controller - Constructor
             </summary>

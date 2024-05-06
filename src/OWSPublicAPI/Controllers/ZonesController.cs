@@ -15,6 +15,8 @@ using OWSData.Repositories.Interfaces;
 using OWSShared.Options;
 using System.Net.Http;
 using OWSInstanceManagement.Requests.Zones;
+using Orleans;
+using OWS.Interfaces;
 
 namespace OWSInstanceManagement.Controllers
 {
@@ -28,10 +30,7 @@ namespace OWSInstanceManagement.Controllers
     [ApiController]
     public class ZonesController : Controller
     {
-        private readonly IInstanceManagementRepository _instanceManagementRepository;
-        private readonly ICharactersRepository _charactersRepository;
-        private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
-        private readonly IHeaderCustomerGUID _customerGuid;
+        private readonly IClusterClient _clusterClient;
 
         /// <summary>
         /// Zones Controller - OnActionExecuting
@@ -49,16 +48,9 @@ namespace OWSInstanceManagement.Controllers
         /// <remarks>
         /// Setup for dependency injection.
         /// </remarks>
-        public ZonesController(
-            IInstanceManagementRepository instanceManagementRepository,
-            ICharactersRepository charactersRepository,
-            IOptions<RabbitMQOptions> rabbitMQOptions,
-            IHeaderCustomerGUID customerGuid)
+        public ZonesController(IClusterClient clusterClient)
         {
-            _instanceManagementRepository = instanceManagementRepository;
-            _charactersRepository = charactersRepository;
-            _rabbitMQOptions = rabbitMQOptions;
-            _customerGuid = customerGuid;
+            _clusterClient = clusterClient;
         }
 
         /// <summary>
@@ -72,9 +64,8 @@ namespace OWSInstanceManagement.Controllers
         [Produces(typeof(SuccessAndErrorMessage))]
         public async Task<IActionResult> AddZone([FromBody] AddZoneRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.AddOrUpdateZone(request.addOrUpdateZone));
         }
     }
 }
