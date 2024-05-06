@@ -181,7 +181,8 @@ namespace OWSPublicAPI.Controllers
         public async Task<IActionResult> LoginAndCreateSession([FromBody] LoginAndCreateSessionRequest request)
         {
             var grain = _clusterClient.GetGrain<IUserGrain>(Guid.NewGuid());
-            return new OkObjectResult(grain.LoginAndCreateSession(request.Email, request.Password));
+            var result = await grain.LoginAndCreateSession(request.Email, request.Password);
+            return new OkObjectResult(result);
         }
 
         /// <summary>

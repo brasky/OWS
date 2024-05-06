@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Orleans;
 
 namespace OWSData.Models.StoredProcs
 {
+    [GenerateSerializer]
     public class AddOrUpdateCustomCharacterData
     {
-        public string CharacterName { get; set; }
-        public string CustomFieldName { get; set; }
-        public string FieldValue { get; set; }
+        [Id(0)] public string CharacterName { get; set; }
+        [Id(1)] public string CustomFieldName { get; set; }
+        [Id(2)] public string FieldValue { get; set; }
     }
 }

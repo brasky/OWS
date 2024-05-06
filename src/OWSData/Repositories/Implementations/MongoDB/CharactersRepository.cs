@@ -16,7 +16,7 @@ namespace OWSData.Repositories.Implementations.MongoDB
 {
     class CharactersRepository
     {
-        private readonly IOptions<StorageOptions> storageOptions;
+        private readonly IOptions<OWSStorageConfig> storageOptions;
         private readonly IMongoCollection<CharacterStats> characterStats;
 
         public CharactersRepository(IConfiguration config)
@@ -27,7 +27,7 @@ namespace OWSData.Repositories.Implementations.MongoDB
             characterStats = database.GetCollection<CharacterStats>("CharacterStats");
         }
 
-        public CharactersRepository(IOptions<StorageOptions> storageOptions)
+        public CharactersRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             //var connection = @"Server=desktop-rvdfpao\sqlexpress;Database=d20;Trusted_Connection=True;ConnectRetryCount=0";
             //this.ConnectionString = connection;

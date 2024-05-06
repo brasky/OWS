@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Orleans;
+using System;
 
 namespace OWSData.Models.StoredProcs
 {
+    [GenerateSerializer(GenerateFieldIds=GenerateFieldIds.PublicProperties)]
     public class PlayerLoginAndCreateSession
     {
         public bool Authenticated { get; set; }

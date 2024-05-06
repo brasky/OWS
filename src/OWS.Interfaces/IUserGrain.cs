@@ -1,7 +1,18 @@
-﻿namespace OWS.Interfaces
+﻿using OWSData.Models.Composites;
+using OWSData.Models.StoredProcs;
+using OWSShared.DTOs;
+
+namespace OWS.Interfaces
 {
-    public interface IServerGrain : IGrainWithIntegerKey
+    public interface IUserGrain : IGrainWithGuidKey
     {
-        //Task RequestServerSpinUpAsync(Guid customerGuid, int zoneInstanceId, string zoneName, int port);
+        Task<IEnumerable<GetAllCharacters>> GetAllCharacters();
+        Task<IEnumerable<GetPlayerGroupsCharacterIsIn>> GetPlayerGroupsCharacterIsIn(string characterName, int playerGroupTypeId);
+        Task<GetUserSession> GetUserSessionAsync();
+        Task<PlayerLoginAndCreateSession> LoginAndCreateSession(string email, string password);
+        Task Logout();
+        Task<PlayerLoginAndCreateSession> RegisterUser(RegisterUserDTO registerUserDto);
+        Task<GetUserSession> SetSelectedCharacterAndGetUserSession(string selectedCharacterName);
+        Task<SuccessAndErrorMessage> UserSessionSetSelectedCharacter(string selectedCharacterName);
     }
 }

@@ -1,14 +1,13 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Options;
-using OWSData.Models;
 using OWSData.Models.Tables;
 using OWSData.Repositories.Interfaces;
 using OWSData.SQL;
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using OWSShared.Options;
+using Microsoft.Data.SqlClient;
 
 namespace OWSData.Repositories.Implementations.MSSQL
 {

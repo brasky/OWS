@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Orleans;
+using System;
 using System.Text.Json.Serialization;
 
 namespace OWSData.Models.StoredProcs
 {
-    
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
     public class GetAllCharacters
     {
         public GetAllCharacters()

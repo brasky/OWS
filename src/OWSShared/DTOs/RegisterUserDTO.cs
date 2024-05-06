@@ -1,4 +1,6 @@
-﻿namespace OWSShared.DTOs
+﻿using Orleans;
+
+namespace OWSShared.DTOs
 {
     /// <summary>
     /// RegisterUser Data Transfer Object
@@ -6,6 +8,7 @@
     /// <remarks>
     /// This object is for collecting POST request parameters
     /// </remarks>
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
     public class RegisterUserDTO
     {
         /// <summary>

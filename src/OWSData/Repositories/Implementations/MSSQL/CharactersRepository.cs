@@ -2,19 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper.Transaction;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OWSData.Models.StoredProcs;
 using OWSData.Repositories.Interfaces;
-using OWSData.Models;
-using OWSData.Models.Composites;
 using OWSData.Models.Tables;
 using OWSData.SQL;
 using OWSShared.Options;
+using Microsoft.Data.SqlClient;
 
 namespace OWSData.Repositories.Implementations.MSSQL
 {

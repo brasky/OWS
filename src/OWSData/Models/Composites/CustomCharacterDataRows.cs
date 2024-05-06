@@ -1,12 +1,12 @@
-﻿using OWSData.Models.Tables;
-using System;
+﻿using Orleans;
+using OWSData.Models.Tables;
 using System.Collections.Generic;
-using System.Text;
 
 namespace OWSData.Models.Composites
 {
+    [GenerateSerializer]
     public class CustomCharacterDataRows
     {
-        public IEnumerable<CustomCharacterData> Rows { get; set; }
+        [Id(0)] public IEnumerable<CustomCharacterData> Rows { get; set; }
     }
 }

@@ -16,9 +16,9 @@ namespace OWSData.Repositories.Implementations.Postgres
 {
     public class InstanceManagementRepository : IInstanceManagementRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public InstanceManagementRepository(IOptions<StorageOptions> storageOptions)
+        public InstanceManagementRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             _storageOptions = storageOptions;
         }

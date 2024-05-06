@@ -7,6 +7,7 @@ using Orleans;
 
 namespace OWSData.Models.StoredProcs
 {
+
     public class GetUserSessionComposite
     {
         public UserSessions userSession { get; set; }
@@ -15,7 +16,7 @@ namespace OWSData.Models.StoredProcs
 
     }
 
-    [GenerateSerializer, Serializable]
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
     public class GetUserSession
     {
         [Id(0)] public Guid CustomerGuid { get; set; }

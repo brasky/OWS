@@ -15,7 +15,7 @@ using System.Text.RegularExpressions;
 
 namespace OWS.Grains
 {
-    public class CharacterGrain : Grain, ICharacterGrain
+    public sealed class CharacterGrain : BaseGrain, ICharacterGrain
     {
         private readonly ILogger<CharacterGrain> _logger;
         private readonly IUsersRepository _usersRepository;
@@ -123,10 +123,7 @@ namespace OWS.Grains
 
         public async Task<CharacterAndCustomData> PublicGetByNameRequest(Guid userSessionId)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+            var customerGuid = GetCustomerId();
 
             CharacterAndCustomData Output = new CharacterAndCustomData();
 
@@ -427,16 +424,6 @@ namespace OWS.Grains
             output.ErrorMessage = "";
 
             return output;
-        }
-
-        private static Guid GetCustomerId()
-        {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            return customerGuid;
         }
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Orleans;
+using System;
 
 namespace OWSData.Models.StoredProcs
 {
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
     public class GetServerInstanceFromPort
     {
 		public string MapName { get; set; }

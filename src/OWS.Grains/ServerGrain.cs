@@ -7,7 +7,7 @@ using System.Text;
 
 namespace OWS.Grains
 {
-    public class ServerGrain : Grain, IServerGrain
+    public sealed class ServerGrain : BaseGrain
     {
         private readonly ILogger<ServerGrain> _logger;
         private readonly IUsersRepository _usersRepository;
@@ -22,7 +22,6 @@ namespace OWS.Grains
             IZoneServerProcessesRepository zoneServerProcessesRepository,
             IOWSInstanceLauncherDataRepository owsInstanceLauncherDataRepository)
         {
-            //_userSession = userSession;
             _logger = logger;
             _usersRepository = usersRepository;
             _owsInstanceLauncherOptions = owsInstanceLauncherOptions;

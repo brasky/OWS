@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Orleans;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace OWSData.Models.StoredProcs
 {
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
+
     public class GetAbilityBars
     {
         public int CharAbilityBarID { get; set; }

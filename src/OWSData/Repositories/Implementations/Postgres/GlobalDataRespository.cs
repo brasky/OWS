@@ -19,9 +19,9 @@ namespace OWSData.Repositories.Implementations.Postgres
 {
     public class GlobalDataRepository : IGlobalDataRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public GlobalDataRepository(IOptions<StorageOptions> storageOptions)
+        public GlobalDataRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             _storageOptions = storageOptions;
         }

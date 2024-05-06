@@ -11,7 +11,7 @@ using OWSShared.DTOs;
 namespace OWS.Grains
 {
     //Primary key is UserSessionId
-    public class UserGrain : Grain, IUserGrain
+    public sealed class UserGrain : BaseGrain, IUserGrain
     {
         private readonly ILogger<UserGrain> _logger;
         private readonly IUsersRepository _usersRepository;
@@ -26,12 +26,7 @@ namespace OWS.Grains
 
         public async Task<PlayerLoginAndCreateSession> LoginAndCreateSession(string email, string password)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            var output = await _usersRepository.LoginAndCreateSession(customerGuid, email, password, false);
+            var output = await _usersRepository.LoginAndCreateSession(GetCustomerId(), email, password, false);
 
             if (!output.Authenticated || !output.UserSessionGuid.HasValue || output.UserSessionGuid == Guid.Empty)
             {
@@ -43,68 +38,39 @@ namespace OWS.Grains
 
         public async Task<GetUserSession> GetUserSessionAsync()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            var session = await _usersRepository.GetUserSession(customerGuid, this.GetPrimaryKey());
+            var session = await _usersRepository.GetUserSession(GetCustomerId(), this.GetPrimaryKey());
             return session;
         }
 
         public async Task<IEnumerable<GetAllCharacters>> GetAllCharacters()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            return await _usersRepository.GetAllCharacters(customerGuid, this.GetPrimaryKey());
+            return await _usersRepository.GetAllCharacters(GetCustomerId(), this.GetPrimaryKey());
         }
 
         public async Task<IEnumerable<GetPlayerGroupsCharacterIsIn>> GetPlayerGroupsCharacterIsIn(string characterName, int playerGroupTypeId)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            return await _usersRepository.GetPlayerGroupsCharacterIsIn(customerGuid, this.GetPrimaryKey(), characterName, playerGroupTypeId);
+            return await _usersRepository.GetPlayerGroupsCharacterIsIn(GetCustomerId(), this.GetPrimaryKey(), characterName, playerGroupTypeId);
         }
 
         public async Task<SuccessAndErrorMessage> UserSessionSetSelectedCharacter(string selectedCharacterName)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            return await _usersRepository.UserSessionSetSelectedCharacter(customerGuid, this.GetPrimaryKey(), selectedCharacterName);
+            return await _usersRepository.UserSessionSetSelectedCharacter(GetCustomerId(), this.GetPrimaryKey(), selectedCharacterName);
         }
 
         public async Task<GetUserSession> SetSelectedCharacterAndGetUserSession(string selectedCharacterName)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
+            var successOrError = await _usersRepository.UserSessionSetSelectedCharacter(GetCustomerId(), this.GetPrimaryKey(), selectedCharacterName);
 
-            var successOrError = await _usersRepository.UserSessionSetSelectedCharacter(customerGuid, this.GetPrimaryKey(), selectedCharacterName);
-
-            var output = await _usersRepository.GetUserSession(customerGuid, this.GetPrimaryKey());
+            var output = await _usersRepository.GetUserSession(GetCustomerId(), this.GetPrimaryKey());
 
             return output;
         }
 
         public async Task<PlayerLoginAndCreateSession> RegisterUser(RegisterUserDTO registerUserDto)
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
+            var customerId = GetCustomerId();
             //Check for duplicate account before creating a new one:
-            var foundUser = await _usersRepository.GetUserFromEmail(customerGuid, registerUserDto.Email);
+            var foundUser = await _usersRepository.GetUserFromEmail(customerId, registerUserDto.Email);
 
             //This user already exists
             if (foundUser != null)
@@ -118,7 +84,7 @@ namespace OWS.Grains
             }
 
             //Register the new account
-            SuccessAndErrorMessage registerOutput = await _usersRepository.RegisterUser(customerGuid, registerUserDto.Email, registerUserDto.Password, registerUserDto.FirstName, registerUserDto.LastName);
+            SuccessAndErrorMessage registerOutput = await _usersRepository.RegisterUser(customerId, registerUserDto.Email, registerUserDto.Password, registerUserDto.FirstName, registerUserDto.LastName);
 
             //There was an error registering the new account
             if (!registerOutput.Success)
@@ -132,7 +98,7 @@ namespace OWS.Grains
             }
 
             //Login to the new account to get a UserSession
-            PlayerLoginAndCreateSession playerLoginAndCreateSession = await _usersRepository.LoginAndCreateSession(customerGuid, registerUserDto.Email, registerUserDto.Password);
+            PlayerLoginAndCreateSession playerLoginAndCreateSession = await _usersRepository.LoginAndCreateSession(customerId, registerUserDto.Email, registerUserDto.Password);
 
             /*
             if (externalLoginProviderFactory != null)
@@ -147,12 +113,7 @@ namespace OWS.Grains
 
         public async Task Logout()
         {
-            if (Guid.TryParse(RequestContext.Get("CustomerId") as string, out var customerGuid))
-            {
-                throw new ArgumentException("Invalid Customer ID");
-            }
-
-            await _usersRepository.Logout(customerGuid, this.GetPrimaryKey());
+            await _usersRepository.Logout(GetCustomerId(), this.GetPrimaryKey());
         }
     }
 }

@@ -13,5 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="..\OWS.Interfaces\OWS.Interfaces.csproj" />
   </ItemGroup>
+  <PropertyGroup>
+    <OrleansGenerateFieldIds>true</OrleansGenerateFieldIds>
+  </PropertyGroup>
 
 </Project>

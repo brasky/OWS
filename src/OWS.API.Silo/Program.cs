@@ -7,8 +7,6 @@ using OWSShared.Options;
 using OWS.Silo;
 using OWSShared.Implementations;
 using OWSShared.Interfaces;
-using System.Configuration;
-using SimpleInjector;
 
 var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
@@ -33,13 +31,15 @@ builder.Services.Configure<OWSShared.Options.RabbitMQOptions>(builder.Configurat
 
 builder.UseOrleans(silo =>
 {
-    silo.UseLocalhostClustering()
-        .ConfigureLogging(logging => logging.AddConsole());
+    silo.UseInMemoryReminderService();
+    
+    silo.UseLocalhostClustering();
     silo.AddAdoNetGrainStorage("OrleansStorage", options =>
     {
-        options.Invariant = "System.Data.SqlClient";
+        options.Invariant = "Microsoft.Data.SqlClient";
         options.ConnectionString = storageOptions.OWSDBConnectionString;
     });
+    silo.UseDashboard();
 });
 
 switch (storageOptions.OWSDBBackend)
@@ -68,6 +68,8 @@ builder.Logging.AddConsole();
 InstanceLauncherStartup.ConfigureInstanceLauncherServices(builder.Services);
 builder.Services.AddSingleton<IZoneServerProcessesRepository, OWSData.Repositories.Implementations.InMemory.ZoneServerProcessesRepository>();
 builder.Services.AddSingleton<IOWSInstanceLauncherDataRepository, OWSData.Repositories.Implementations.InMemory.OWSInstanceLauncherDataRepository>();
+builder.Services.AddSingleton<ICustomCharacterDataSelector, DefaultCustomCharacterDataSelector>();
+builder.Services.AddSingleton<IGetReadOnlyPublicCharacterData, DefaultGetReadOnlyPublicCharacterData>();
 
 using IHost host = builder.Build();
 

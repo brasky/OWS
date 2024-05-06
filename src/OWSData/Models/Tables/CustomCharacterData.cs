@@ -1,8 +1,11 @@
-﻿using System;
+﻿using Orleans;
+using System;
 using System.Collections.Generic;
 
 namespace OWSData.Models.Tables
 {
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
+
     public partial class CustomCharacterData
     {
         public Guid CustomerGuid { get; set; }

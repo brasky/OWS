@@ -18,9 +18,9 @@ namespace OWSData.Repositories.Implementations.Postgres
 
     public class UsersRepository : IUsersRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public UsersRepository(IOptions<StorageOptions> storageOptions)
+        public UsersRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             this._storageOptions = storageOptions;
         }

@@ -1,26 +1,23 @@
 ﻿using Dapper;
 using Microsoft.Extensions.Options;
-using OWSData.Models;
 using OWSData.Models.Composites;
 using OWSData.Models.StoredProcs;
-using OWSData.Models.Tables;
 using OWSData.Repositories.Interfaces;
 using OWSData.SQL;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
-using System.Text;
 using System.Threading.Tasks;
 using OWSShared.Options;
+using Microsoft.Data.SqlClient;
 
 namespace OWSData.Repositories.Implementations.MSSQL
 {
     public class InstanceManagementRepository : IInstanceManagementRepository
     {
-        private readonly IOptions<StorageOptions> _storageOptions;
+        private readonly IOptions<OWSStorageConfig> _storageOptions;
 
-        public InstanceManagementRepository(IOptions<StorageOptions> storageOptions)
+        public InstanceManagementRepository(IOptions<OWSStorageConfig> storageOptions)
         {
             _storageOptions = storageOptions;
         }

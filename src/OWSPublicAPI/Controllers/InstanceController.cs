@@ -6,15 +6,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
-using SimpleInjector;
 using OWSData.Models.StoredProcs;
 using OWSShared.Interfaces;
 using OWSInstanceManagement.Requests.Instance;
 using OWSData.Models.Composites;
 using OWSData.Repositories.Interfaces;
 using OWSShared.Options;
-using System.Net.Http;
 using Serilog;
+using Orleans;
+using OWS.Interfaces;
 
 namespace OWSInstanceManagement.Controllers
 {
@@ -22,29 +22,15 @@ namespace OWSInstanceManagement.Controllers
     [ApiController]
     public class InstanceController : Controller
     {
-        private readonly IInstanceManagementRepository _instanceManagementRepository;
-        private readonly ICharactersRepository _charactersRepository;
-        private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
-        private readonly IHeaderCustomerGUID _customerGuid;
+        private readonly IClusterClient _clusterClient;
 
-        public InstanceController(
-            IInstanceManagementRepository instanceManagementRepository,
-            ICharactersRepository charactersRepository,
-            IOptions<RabbitMQOptions> rabbitMQOptions,
-            IHeaderCustomerGUID customerGuid)
+        public InstanceController(IClusterClient clusterClient)
         {
-            _instanceManagementRepository = instanceManagementRepository;
-            _charactersRepository = charactersRepository;
-            _rabbitMQOptions = rabbitMQOptions;
-            _customerGuid = customerGuid;
+            _clusterClient = clusterClient;
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (_customerGuid.CustomerGUID == Guid.Empty)
-            {
-                context.Result = new UnauthorizedResult();
-            }
         }
 
         [HttpPost]
@@ -55,9 +41,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> SetZoneInstanceStatusRequest([FromBody] SetZoneInstanceStatusRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.SetZoneInstanceStatusRequest(request.request.ZoneInstanceID, request.request.InstanceStatus));
         }
 
         [HttpPost]
@@ -68,9 +53,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> ShutDownServerInstance([FromBody] ShutDownServerInstanceRequest request)
         {
-            request.SetData(_rabbitMQOptions, _instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.ShutDownServerInstance(request.WorldServerID, request.ZoneInstanceID));
         }
 
         [HttpPost]
@@ -81,9 +65,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<SuccessAndErrorMessage> RegisterLauncher([FromBody] RegisterInstanceLauncherRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return await grain.RegisterLauncher(request.Request);
         }
 
         [HttpPost]
@@ -94,9 +77,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> SpinUpServerInstance([FromBody] SpinUpServerInstanceRequest request)
         {
-            request.SetData(_rabbitMQOptions, _charactersRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.SpinUpServerInstance(request.WorldServerID, request.ZoneInstanceID, request.ZoneName, request.Port));
         }
 
         [HttpGet]
@@ -115,9 +97,8 @@ namespace OWSInstanceManagement.Controllers
                 Log.Error("Http Header X-LauncherGUID is empty!");
             }
 
-            request.SetData(_instanceManagementRepository, launcherGuid, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.StartInstanceLauncher(launcherGuid));
         }
 
         [HttpPost]
@@ -134,22 +115,8 @@ namespace OWSInstanceManagement.Controllers
                 Log.Error("Http Header X-LauncherGUID is empty!");
             }
 
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
-        }
-
-        [HttpPost]
-        [Route("GetServerToConnectTo")]
-        [Produces(typeof(JoinMapByCharName))]
-        /*[SwaggerOperation("ByName")]
-        [SwaggerResponse(200)]
-        [SwaggerResponse(404)]*/
-        public async Task<IActionResult> GetServerToConnectToRequest([FromBody] GetServerToConnectToRequest request)
-        {
-            request.SetData(_charactersRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.ShutDownInstanceLauncher(request.Request.WorldServerID));
         }
 
         /// <summary>
@@ -163,8 +130,8 @@ namespace OWSInstanceManagement.Controllers
         [Produces(typeof(GetServerInstanceFromPort))]
         public async Task<GetServerInstanceFromPort> GetZoneInstance([FromBody] int ZoneInstanceId)
         {
-            GetZoneInstanceRequest request = new GetZoneInstanceRequest(ZoneInstanceId, _instanceManagementRepository, _customerGuid);
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return await grain.GetZoneInstance(ZoneInstanceId);
         }
 
         [HttpPost]
@@ -175,9 +142,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<GetServerInstanceFromPort> GetServerInstanceFromPort([FromBody] GetServerInstanceFromPortRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid, Request.HttpContext.Connection.RemoteIpAddress.ToString());
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return await grain.GetServerInstanceFromPort(Request.HttpContext.Connection.RemoteIpAddress.ToString(), request.Port);
         }
 
         [HttpPost]
@@ -188,9 +154,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> GetZoneInstancesForWorldServer([FromBody] GetZoneInstancesForWorldServerRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.GetZoneInstancesForWorldServer(request.Request.WorldServerID));
         }
 
         [HttpPost]
@@ -201,9 +166,8 @@ namespace OWSInstanceManagement.Controllers
         [SwaggerResponse(404)]*/
         public async Task<IActionResult> UpdateNumberOfPlayers([FromBody] UpdateNumberOfPlayersRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.UpdateNumberOfPlayers(request.ZoneInstanceId, request.NumberOfConnectedPlayers));
         }
 
         [HttpPost]
@@ -211,9 +175,8 @@ namespace OWSInstanceManagement.Controllers
         [Produces(typeof(IEnumerable<GetZoneInstancesForZone>))]
         public async Task<IActionResult> GetZoneInstancesForZone([FromBody] GetZoneInstancesForZoneRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.GetZoneInstancesForWorldServer(request.Request.ZoneName));
         }
 
         [HttpPost]
@@ -221,9 +184,8 @@ namespace OWSInstanceManagement.Controllers
         [Produces(typeof(GetCurrentWorldTime))]
         public async Task<IActionResult> GetCurrentWorldTime([FromBody] GetCurrentWorldTimeRequest request)
         {
-            request.SetData(_instanceManagementRepository, _customerGuid);
-
-            return await request.Handle();
+            var grain = _clusterClient.GetGrain<IInstanceGrain>(Guid.NewGuid());
+            return new OkObjectResult(await grain.GetCurrentWorldTime());
         }
     }
 }

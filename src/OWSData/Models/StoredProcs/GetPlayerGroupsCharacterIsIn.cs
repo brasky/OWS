@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Orleans;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace OWSData.Models.StoredProcs
 {
+    [GenerateSerializer(GenerateFieldIds = GenerateFieldIds.PublicProperties)]
+
     public class GetPlayerGroupsCharacterIsIn
     {
         public int PlayerGroupID { get; set; }
