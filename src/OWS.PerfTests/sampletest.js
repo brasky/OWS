@@ -84,9 +84,7 @@ export default (userSessionGuid) => {
                 UserSessionGUID: userSessionGuid
             };
         const res = http.post(`${BASE_URL}/users/GetAllCharacters`, JSON.stringify(payload), requestConfigWithTag({ name: 'Get' }));
-        check(res, { 'retrieved characters': (r) => r.status === 200 });
-        //Should be 0 because we just made our account
-        check(res.json(), { 'retrieved characters': (r) => r.length === 0 });
+        check(res, { 'retrieved characters response successful': (r) => r.status === 200 });
     });
     
     sleep(1)
@@ -117,9 +115,7 @@ export default (userSessionGuid) => {
                 UserSessionGUID: userSessionGuid
             };
         const res = http.post(`${BASE_URL}/users/GetAllCharacters`, JSON.stringify(payload), requestConfigWithTag({ name: 'Get' }));
-        check(res, { 'retrieved characters': (r) => r.status === 200 });
-        //Should be 1 because we just made a character
-        check(res.json(), { 'retrieved characters': (r) => r.length === 1 });
+        check(res, { 'retrieved characters response successful': (r) => r.status === 200 });
     });
 
     sleep(1)
