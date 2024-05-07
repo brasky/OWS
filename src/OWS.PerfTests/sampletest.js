@@ -5,6 +5,8 @@ import { sleep } from 'k6'
 export let options = {
     insecureSkipTLSVerify: true,
     noConnectionReuse: false,
+    // iterations: 2,
+    // vus: 1
     stages: [
         { duration: '10s', target: 10},
         { duration: '10s', target: 10},
@@ -23,33 +25,18 @@ function randomString(length, charset = '') {
     return res;
 }
 
-const USERNAME = `${randomString(10)}@example.com`; // Set your own email or `${randomString(10)}@example.com`;
 const PASSWORD = 'superCroc2024';
+const EMAIL = `${randomString(15)}@example.com`
 
-const BASE_URL = 'https://localhost:44303/api';
+const BASE_URL = 'http://localhost:44302/api';
 
-// Register a new user and retrieve authentication token for subsequent API requests
+
+
+//only runs once... should really make all the accounts in advance here.
 export function setup() {
-    let data = {
-        FirstName: 'Crocodile',
-        LastName: 'Owner',
-        Email:USERNAME,
-        Password: PASSWORD
-    };
-
-    const res = http.post(`${BASE_URL}/users/RegisterUser`, JSON.stringify(data), {
-        headers: { 'Content-Type': 'application/json' }
-    });
-    check(res, { 'created user': (r) => r.json('authenticated') === true });
-
-    const userSessionGuid = res.json('userSessionGuid');
-    check(userSessionGuid, { 'logged in successfully': () => userSessionGuid !== '' });
-
-    return userSessionGuid;
 }
 
-
-export default (userSessionGuid) => {
+export default () => {
     // set the authorization header on the session for the subsequent requests
     const requestConfigWithTag = (tag) => ({
         headers: {
@@ -65,10 +52,43 @@ export default (userSessionGuid) => {
         ),
     });
 
+    let accountData = {
+        FirstName: 'Crocodile',
+        LastName: 'Owner',
+        Email: EMAIL,// Set your own email or `${randomString(10)}@example.com`;
+        Password: PASSWORD
+    };
+
+    // console.log(accountData);
+    const res = http.post(`${BASE_URL}/users/RegisterUser`, JSON.stringify(accountData), {
+        headers: { 'Content-Type': 'application/json', 'X-CustomerGUID': 'E2FED99F-2F3A-4BFB-AB00-A586B92B5549' }
+    });
+    
+    // check(res, { 'created user': (r) => r.json('authenticated') === true });
+
+    // const userSessionGuid = res.json('userSessionGuid');
+    // check(userSessionGuid, { 'logged in successfully': () => userSessionGuid !== '' });
+    // console.log(res);
+    
+
+    let userSessionGuid = ""
+    group('00. Login', () => {
+        const payload = {
+            Email: accountData.Email,
+            Password: PASSWORD
+        };
+        // console.log(payload);
+        const res = http.post(`${BASE_URL}/users/LoginAndCreateSession`, JSON.stringify(payload), requestConfigWithTag({ name: 'Login' }));
+        check(res, { 'Login was successful': (r) => r.json('authenticated') === true });
+        // console.log(res);
+        userSessionGuid = res.json("userSessionGuid");
+
+    });
+
     let URL = `${BASE_URL}`;
     group('01. GetUserSession', () => {
         const res = http.get(`${URL}/users/GetUserSession?UserSessionGUID=${userSessionGuid}`, requestConfigWithTag({ name: 'Create' }));
-
+        //console.log(res)
         if (check(res, { 'Got user session!': (r) => r.status === 200 })) {
             // URL = `${URL}${res.json('id')}/`;
         } else {
@@ -91,7 +111,7 @@ export default (userSessionGuid) => {
 
     const newCharacterPayload = {
         UserSessionGUID: userSessionGuid,
-        CharacterName: randomString(8),
+        CharacterName: randomString(15),
         ClassName: "MaleWarrior"
     };
 
@@ -149,5 +169,7 @@ export default (userSessionGuid) => {
         });
 
     });
+
+    sleep(1)
 
 };
